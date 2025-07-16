@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Profile</title>
+</head>
+<body>
+  <h2>User Profile</h2>
+  <div id="profile"></div>
+  <br />
+  <button onclick="logout()">Log Out</button>
+
+  <script>
+    async function loadProfile() {
+      const params = new URLSearchParams(window.location.search);
+      const email = params.get("email");
+      if (!email) {
+        alert("No email found. Redirecting to login.");
+        window.location.href = "/index.html";
+        return;
+      }
+
+      const res = await fetch(`/api/user/${encodeURIComponent(email)}`);
+      const user = await res.json();
+
+      if (res.ok) {
+        document.getElementById("profile").innerHTML = `
+          <p><strong>Name:</strong> ${user.name}</p>
+          <p><strong>Email:</strong> ${user.email}</p>
+        `;
+      } else {
+        alert("User not found. Redirecting to login.");
+        window.location.href = "/index.html";
+      }
+    }
+
+    function logout() {
+      window.location.href = "/index.html";
+    }
+
+    loadProfile();
+  </script>
+</body>
+</html>
