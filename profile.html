@@ -6,12 +6,51 @@
   <title>User Profile</title>
 </head>
 <body>
-  <h2>User Profile</h2>
+  <h2>PROF</h2>
   <div id="profile"></div>
+
+  <audio id="audioPlayer" controls></audio>
+
+
+  <!-- 🎙️ WAV File Upload Form -->
+  <h3>Upload Your WAV Audio File</h3>
+  <form id="uploadForm" enctype="multipart/form-data">
+    <input type="file" id="audio" name="audio" accept=".wav" required />
+    <button type="submit">Upload</button>
+  </form>
+  <p id="uploadStatus"></p>
+
   <br />
   <button onclick="logout()">Log Out</button>
 
   <script>
+    let currentEmail = null;
+
+    async function logLogin() {
+      if (!currentEmail) return;
+      await fetch('/api/log-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentEmail })
+      });
+    }
+
+    async function logLogout() {
+      if (!currentEmail) return;
+      await fetch('/api/log-logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: currentEmail })
+      });
+    }
+
+    function logout() {
+      logLogout();
+      window.location.href = "/index.html";
+    }
+
+    window.addEventListener('beforeunload', logLogout);
+
     async function loadProfile() {
       const params = new URLSearchParams(window.location.search);
       const email = params.get("email");
@@ -20,6 +59,9 @@
         window.location.href = "/index.html";
         return;
       }
+
+      currentEmail = email;
+      await logLogin();
 
       const res = await fetch(`/api/user/${encodeURIComponent(email)}`);
       const user = await res.json();
@@ -35,9 +77,41 @@
       }
     }
 
-    function logout() {
-      window.location.href = "/index.html";
-    }
+    // 🎯 Handle File Upload
+    document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      if (!currentEmail) return;
+
+      const formData = new FormData();
+      const fileInput = document.getElementById("audio");
+
+      if (!fileInput.files.length) {
+        alert("Please select a WAV file to upload.");
+        return;
+      }
+
+      formData.append("audio", fileInput.files[0]);
+
+      const response = await fetch(`/api/upload-audio?email=${encodeURIComponent(currentEmail)}`, {
+        method: "POST",
+        body: formData
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        document.getElementById("uploadStatus").innerText = "✅ Upload successful!";
+        // Set audio player source to the uploaded file
+        const audioUrl = `/uploads/${encodeURIComponent(currentEmail)}/audio.wav`;
+        const audioPlayer = document.getElementById("audioPlayer");
+        audioPlayer.src = audioUrl;
+        audioPlayer.load();
+        audioPlayer.style.display = "block";
+      } else {
+        document.getElementById("uploadStatus").innerText = "❌ Upload failed.";
+        console.error(result);
+      }
+    });
 
     loadProfile();
   </script>

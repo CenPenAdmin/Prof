@@ -1,0 +1,8 @@
+{
+  "name": "Rick",
+  "email": "tr@w.com",
+  "location": {
+    "latitude": 40.6001403,
+    "longitude": -77.4063035
+  }
+}

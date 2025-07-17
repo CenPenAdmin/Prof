@@ -4,9 +4,66 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Login</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #ffccff, #ccffff);
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      text-align: center;
+      padding-top: 100px;
+    }
+
+    h2 {
+      font-size: 2.5rem;
+      color: #ff3399;
+      text-shadow: 2px 2px #ffffff;
+      animation: wiggle 1s infinite alternate;
+      letter-spacing: 2px;
+    }
+
+    @keyframes wiggle {
+      0% { transform: rotate(-2deg); }
+      100% { transform: rotate(2deg); }
+    }
+
+    form {
+      margin: 20px auto;
+    }
+
+    input[type="email"] {
+      padding: 12px;
+      font-size: 1rem;
+      border: 2px dashed #66ccff;
+      border-radius: 10px;
+      width: 250px;
+      transition: all 0.3s ease;
+    }
+
+    input[type="email"]:focus {
+      border-color: #ff99cc;
+      background-color: #f0faff;
+      outline: none;
+    }
+
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      background-color: #ff66cc;
+      color: white;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      box-shadow: 2px 2px 5px #888;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #ff3399;
+    }
+  </style>
 </head>
 <body>
-  <h2>Login</h2>
+  <h2>Give me all your info PROF</h2>
   <form id="loginForm">
     <input type="email" id="email" placeholder="Enter your email" required />
     <button type="submit">Login</button>
