@@ -2,14 +2,24 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const multer = require('multer');
+const http = require('http');
+const { Server } = require('socket.io');
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: {
+        origin: "*",
+        methods: ["GET", "POST"]
+    }
+});
 const PORT = 3000;
 
 // Configure multer for file uploads
 const upload = multer({ dest: 'uploads/temp/' });
 
 app.use(express.static('.'));
+app.use(express.json()); // Add JSON parsing middleware
 
 // 📋 Get User Profile
 app.get('/api/user/:email', (req, res) => {
@@ -128,7 +138,145 @@ app.post('/api/messages', express.json(), (req, res) => {
   res.json({ success: true, message: newMessage });
 });
 
-// 🚀 Start Server
-app.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
+// 📰 NEWS STORIES API ENDPOINTS
+
+// Get all news stories
+app.get('/api/news/stories', (req, res) => {
+  const storiesPath = path.join(__dirname, 'news-stories.json');
+  
+  if (!fs.existsSync(storiesPath)) {
+    return res.json({ stories: [] });
+  }
+
+  const stories = JSON.parse(fs.readFileSync(storiesPath, 'utf8'));
+  res.json({ stories });
+});
+
+// Post a new story
+app.post('/api/news/stories', express.json(), (req, res) => {
+  const story = req.body;
+  if (!story || !story.title || !story.content || !story.author) {
+    return res.status(400).json({ error: 'Missing required story fields' });
+  }
+
+  const storiesPath = path.join(__dirname, 'news-stories.json');
+  
+  // Load existing stories or create empty array
+  let stories = [];
+  if (fs.existsSync(storiesPath)) {
+    stories = JSON.parse(fs.readFileSync(storiesPath, 'utf8'));
+  }
+
+  // Add new story
+  stories.unshift(story);
+
+  // Save stories
+  fs.writeFileSync(storiesPath, JSON.stringify(stories, null, 2));
+  
+  res.json({ success: true, story });
+});
+
+// Update story (likes, etc.)
+app.put('/api/news/stories/:storyId', express.json(), (req, res) => {
+  const { storyId } = req.params;
+  const updates = req.body;
+  
+  const storiesPath = path.join(__dirname, 'news-stories.json');
+  
+  if (!fs.existsSync(storiesPath)) {
+    return res.status(404).json({ error: 'Stories not found' });
+  }
+
+  let stories = JSON.parse(fs.readFileSync(storiesPath, 'utf8'));
+  const storyIndex = stories.findIndex(s => s.id === storyId);
+  
+  if (storyIndex === -1) {
+    return res.status(404).json({ error: 'Story not found' });
+  }
+
+  // Update story
+  stories[storyIndex] = { ...stories[storyIndex], ...updates };
+
+  // Save stories
+  fs.writeFileSync(storiesPath, JSON.stringify(stories, null, 2));
+  
+  res.json({ success: true, story: stories[storyIndex] });
+});
+
+// Get comments for all stories
+app.get('/api/news/comments', (req, res) => {
+  const commentsPath = path.join(__dirname, 'news-comments.json');
+  
+  if (!fs.existsSync(commentsPath)) {
+    return res.json({ comments: {} });
+  }
+
+  const comments = JSON.parse(fs.readFileSync(commentsPath, 'utf8'));
+  res.json({ comments });
+});
+
+// Post a new comment
+app.post('/api/news/comments', express.json(), (req, res) => {
+  const { storyId, comment } = req.body;
+  if (!storyId || !comment) {
+    return res.status(400).json({ error: 'Missing storyId or comment' });
+  }
+
+  const commentsPath = path.join(__dirname, 'news-comments.json');
+  
+  // Load existing comments or create empty object
+  let comments = {};
+  if (fs.existsSync(commentsPath)) {
+    comments = JSON.parse(fs.readFileSync(commentsPath, 'utf8'));
+  }
+
+  // Add new comment
+  if (!comments[storyId]) {
+    comments[storyId] = [];
+  }
+  comments[storyId].unshift(comment);
+
+  // Save comments
+  fs.writeFileSync(commentsPath, JSON.stringify(comments, null, 2));
+  
+  res.json({ success: true, comment });
+});
+
+// � WebSocket handling for real-time updates
+io.on('connection', (socket) => {
+  console.log('User connected to Prof News:', socket.id);
+  
+  // Join news room for real-time updates
+  socket.join('news-feed');
+  
+  // Handle new story posted
+  socket.on('story-posted', (story) => {
+    // Broadcast to all other users in the news room
+    socket.to('news-feed').emit('new-story', story);
+  });
+  
+  // Handle story liked
+  socket.on('story-liked', (data) => {
+    socket.to('news-feed').emit('story-updated', data);
+  });
+  
+  // Handle new comment
+  socket.on('comment-posted', (data) => {
+    socket.to('news-feed').emit('new-comment', data);
+  });
+  
+  // Handle story engagement update
+  socket.on('engagement-update', (data) => {
+    socket.to('news-feed').emit('engagement-updated', data);
+  });
+  
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
+
+// �🚀 Start Server
+server.listen(PORT, () => {
+  console.log(`✅ Prof Server with real-time updates running at http://localhost:${PORT}`);
+  console.log(`📡 WebSocket server ready for real-time news updates`);
 });

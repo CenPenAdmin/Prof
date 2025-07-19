@@ -2,6 +2,8 @@
 users/
 messages/
 uploads/
+news-stories.json
+news-comments.json
 
 # Node.js
 node_modules/
