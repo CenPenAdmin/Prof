@@ -4,60 +4,221 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sign Up</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #f0f2ff, #e8f4f8, #f0fff0);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      text-align: center;
+      padding-top: 60px;
+      color: #333;
+      min-height: 100vh;
+    }
+    h2 {
+      font-size: 2.5rem;
+      color: #4a5568;
+      margin-bottom: 30px;
+      font-weight: 600;
+    }
+    #clown {
+      margin: 0 auto 30px auto;
+      width: 80px;
+      height: 80px;
+      position: relative;
+    }
+    .face {
+      background: #fff;
+      border-radius: 50%;
+      width: 70px;
+      height: 70px;
+      position: absolute;
+      left: 5px;
+      top: 5px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .eye {
+      background: #333;
+      border-radius: 50%;
+      width: 12px;
+      height: 12px;
+      position: absolute;
+      top: 25px;
+    }
+    .eye.left { left: 20px;}
+    .eye.right { left: 45px;}
+    .nose {
+      background: #ff6b6b;
+      border-radius: 50%;
+      width: 8px;
+      height: 8px;
+      position: absolute;
+      left: 33px;
+      top: 38px;
+    }
+    .mouth {
+      position: absolute;
+      left: 25px;
+      top: 48px;
+      width: 20px;
+      height: 8px;
+      border-bottom: 2px solid #333;
+      border-radius: 0 0 20px 20px;
+    }
+    .cheek {
+      background: #ffb3ba;
+      border-radius: 50%;
+      width: 8px;
+      height: 6px;
+      position: absolute;
+      top: 42px;
+    }
+    .cheek.left { left: 15px;}
+    .cheek.right { left: 50px;}
+    form {
+      margin: 30px auto;
+      background: rgba(255,255,255,0.9);
+      padding: 30px 40px;
+      border-radius: 12px;
+      box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+      display: inline-block;
+      font-size: 1rem;
+      max-width: 400px;
+      backdrop-filter: blur(10px);
+    }
+    input, button {
+      font-size: 1rem;
+      padding: 12px 16px;
+      margin: 10px 0;
+      border-radius: 8px;
+      border: 2px solid #e2e8f0;
+      outline: none;
+      transition: border-color 0.3s ease, box-shadow 0.3s ease;
+      background: #fff;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    input:focus {
+      border-color: #4299e1;
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+    }
+    button {
+      background: linear-gradient(135deg, #4299e1, #3182ce);
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      margin-top: 15px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    button:hover:not(:disabled) {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+    }
+    button:active:not(:disabled) {
+      transform: translateY(0);
+    }
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .message {
+      margin: 20px auto;
+      padding: 15px 20px;
+      border-radius: 8px;
+      font-weight: 500;
+      max-width: 400px;
+      text-align: left;
+    }
+    .success {
+      background: #f0fff4;
+      color: #22543d;
+      border: 1px solid #9ae6b4;
+    }
+    .error {
+      background: #fed7d7;
+      color: #742a2a;
+      border: 1px solid #feb2b2;
+    }
+    .form-title {
+      font-size: 1.2rem;
+      color: #2d3748;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+  </style>
 </head>
 <body>
-  <h2>Create a New Profile</h2>
+  <div id="clown">
+    <div class="face"></div>
+    <div class="eye left"></div>
+    <div class="eye right"></div>
+    <div class="nose"></div>
+    <div class="mouth"></div>
+    <div class="cheek left"></div>
+    <div class="cheek right"></div>
+  </div>
+  <h2>Create Your Profile</h2>
+  
   <form id="signupForm">
-    <input type="text" id="name" placeholder="Enter your name" required />
-    <br />
-    <input type="email" id="email" placeholder="Enter your email" required />
-    <br />
-    <button type="submit">Create Profile</button>
+    <div class="form-title">Enter your details to get started</div>
+    <input type="text" id="name" placeholder="Full name" required />
+    <input type="email" id="email" placeholder="Email address" required />
+    <button type="submit" id="createBtn">Create Profile</button>
   </form>
 
+  <div id="messageDiv"></div>
+
   <script>
-    document.getElementById('signupForm').addEventListener('submit', (e) => {
+    document.getElementById('signupForm').addEventListener('submit', async (e) => {
       e.preventDefault();
+      
+      const formData = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value
+      };
 
-      // Request location from user
-      navigator.geolocation.getCurrentPosition(async (position) => {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
+      const createBtn = document.getElementById('createBtn');
+      createBtn.disabled = true;
+      createBtn.textContent = 'Creating...';
 
-        const formData = {
-          name: document.getElementById('name').value,
-          email: document.getElementById('email').value,
-          location: {
-            latitude: lat,
-            longitude: lon
-          }
-        };
-
-        try {
-          const res = await fetch('/api/signup', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
-          });
-
-          const data = await res.json();
-
-          if (res.ok) {
+      try {
+        const res = await fetch('/api/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        });
+        
+        const data = await res.json();
+        
+        if (res.ok) {
+          showMessage('success', 'Profile created successfully! Redirecting...');
+          setTimeout(() => {
             window.location.href = `/profile.html?email=${encodeURIComponent(formData.email)}`;
-          } else {
-            alert(data.error);
-          }
-
-        } catch (err) {
-          console.error("Signup error:", err);
-          alert("Error signing up.");
+          }, 1500);
+        } else {
+          showMessage('error', data.error);
+          createBtn.disabled = false;
+          createBtn.textContent = 'Create Profile';
         }
-
-      }, (error) => {
-        console.error("Geolocation error:", error);
-        alert("You must allow location access to complete signup.");
-      });
+      } catch (err) {
+        console.error("Signup error:", err);
+        showMessage('error', 'Error creating profile. Please try again.');
+        createBtn.disabled = false;
+        createBtn.textContent = 'Create Profile';
+      }
     });
+
+    function showMessage(type, text) {
+      const messageDiv = document.getElementById('messageDiv');
+      messageDiv.innerHTML = `<div class="message ${type}">${text}</div>`;
+      
+      // Auto-hide success messages after 5 seconds
+      if (type === 'success') {
+        setTimeout(() => {
+          messageDiv.innerHTML = '';
+        }, 5000);
+      }
+    }
   </script>
 </body>
 </html>

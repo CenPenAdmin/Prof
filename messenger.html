@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Prof Direct Message</title>
+  <style>
+    body {
+      background: #222;
+      color: #eee;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .chat-box {
+      background: #333;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px #0008;
+      width: 400px;
+      max-width: 90vw;
+      display: flex;
+      flex-direction: column;
+      padding: 0;
+    }
+    .chat-header {
+      background: #444;
+      padding: 12px;
+      border-top-left-radius: 8px;
+      border-top-right-radius: 8px;
+      font-weight: bold;
+      text-align: center;
+      position: relative;
+    }
+    .back-profile-btn {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      background: #0af;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      padding: 6px 14px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 15px;
+    }
+    .chat-messages {
+      flex: 1;
+      padding: 12px;
+      overflow-y: auto;
+      min-height: 200px;
+      max-height: 300px;
+      background: #222;
+    }
+    .chat-input {
+      display: flex;
+      border-top: 1px solid #444;
+      background: #333;
+      padding: 8px;
+      border-bottom-left-radius: 8px;
+      border-bottom-right-radius: 8px;
+    }
+    .chat-input input {
+      flex: 1;
+      padding: 8px;
+      border-radius: 4px;
+      border: none;
+      font-size: 16px;
+      margin-right: 8px;
+    }
+    .chat-input button {
+      padding: 8px 16px;
+      border-radius: 4px;
+      border: none;
+      background: #0af;
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .message {
+      margin-bottom: 10px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      max-width: 70%;
+      word-break: break-word;
+    }
+    .message.me {
+      background: #0af;
+      color: #fff;
+      align-self: flex-end;
+    }
+    .message.them {
+      background: #eee;
+      color: #222;
+      align-self: flex-start;
+    }
+    .user-select {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 12px;
+      background: #222;
+      border-bottom: 1px solid #444;
+    }
+    .user-select label {
+      color: #eee;
+      font-size: 14px;
+      margin-right: 6px;
+    }
+    .user-select input {
+      border-radius: 4px;
+      border: none;
+      padding: 4px 8px;
+      font-size: 14px;
+      margin-right: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-box">
+    <div class="chat-header">
+      Direct Message
+      <a id="backProfile" class="back-profile-btn" href="#">Profile</a>
+    </div>
+    <div class="user-select">
+      <div>
+        <label for="meEmail">Your Email:</label>
+        <input type="email" id="meEmail" placeholder="you@example.com">
+      </div>
+      <div>
+        <label for="themEmail">To:</label>
+        <input type="email" id="themEmail" placeholder="other@example.com">
+      </div>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input">
+      <input type="text" id="chatInput" placeholder="Type a message..." />
+      <button id="sendBtn">Send</button>
+    </div>
+  </div>
+  <script>
+    // Get elements
+    const chatMessages = document.getElementById('chatMessages');
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const meEmailInput = document.getElementById('meEmail');
+    const themEmailInput = document.getElementById('themEmail');
+    const backProfile = document.getElementById('backProfile');
+
+    // Parse email from URL if present
+    function getQueryParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name) || '';
+    }
+    meEmailInput.value = getQueryParam('me') || '';
+    themEmailInput.value = getQueryParam('them') || '';
+
+    // Set profile link
+    function updateProfileLink() {
+      const meEmail = encodeURIComponent(meEmailInput.value.trim());
+      backProfile.href = meEmail ? `profile.html?email=${meEmail}` : 'profile.html';
+    }
+    meEmailInput.addEventListener('input', updateProfileLink);
+    updateProfileLink();
+
+    // Message sending logic
+    function addMessage(text, from, timestamp) {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'message ' + (from === meEmailInput.value ? 'me' : 'them');
+      
+      const timeStr = timestamp ? new Date(timestamp).toLocaleTimeString() : '';
+      const sender = from === meEmailInput.value ? 'You' : from;
+      msgDiv.innerHTML = `<strong>${sender}:</strong> ${text}${timeStr ? ` <small>(${timeStr})</small>` : ''}`;
+      
+      chatMessages.appendChild(msgDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Load messages from server
+    async function loadMessages() {
+      const me = meEmailInput.value.trim();
+      const them = themEmailInput.value.trim();
+      if (!me || !them) return;
+
+      try {
+        const response = await fetch(`/api/messages?user1=${encodeURIComponent(me)}&user2=${encodeURIComponent(them)}`);
+        const data = await response.json();
+        
+        chatMessages.innerHTML = ''; // Clear existing messages
+        data.messages.forEach(msg => {
+          addMessage(msg.message, msg.from, msg.timestamp);
+        });
+      } catch (error) {
+        console.error('Error loading messages:', error);
+      }
+    }
+
+    // Send message to server
+    async function sendMessage(text) {
+      const me = meEmailInput.value.trim();
+      const them = themEmailInput.value.trim();
+      if (!me || !them || !text) return;
+
+      try {
+        const response = await fetch('/api/messages', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            from: me,
+            to: them,
+            message: text
+          })
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          addMessage(data.message.message, data.message.from, data.message.timestamp);
+        } else {
+          console.error('Error sending message:', response.statusText);
+        }
+      } catch (error) {
+        console.error('Error sending message:', error);
+      }
+    }
+
+    sendBtn.onclick = function() {
+      const text = chatInput.value.trim();
+      if (!text) return;
+      sendMessage(text);
+      chatInput.value = '';
+    };
+
+    // Load messages when email inputs change
+    meEmailInput.addEventListener('input', () => {
+      updateProfileLink();
+      loadMessages();
+    });
+    themEmailInput.addEventListener('input', loadMessages);
+
+    // Auto-refresh messages every 3 seconds
+    setInterval(loadMessages, 3000);
+
+    // Initial load
+    if (meEmailInput.value && themEmailInput.value) {
+      loadMessages();
+    }
+
+    chatInput.addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        sendBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>

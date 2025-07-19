@@ -1,0 +1,16 @@
+[
+  {
+    "id": "msg_001",
+    "sender": "user1@example.com",
+    "receiver": "user2@example.com",
+    "message": "Hello! This is a sample message.",
+    "timestamp": "2025-01-01T12:00:00Z"
+  },
+  {
+    "id": "msg_002",
+    "sender": "user2@example.com",
+    "receiver": "user1@example.com",
+    "message": "Hi there! This is a reply.",
+    "timestamp": "2025-01-01T12:01:00Z"
+  }
+]

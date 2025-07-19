@@ -1,0 +1,1215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>PROF Grid Game</title>
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      background-color: #111;
+      color: #0ff;
+      font-family: monospace;
+      touch-action: manipulation;
+    }
+
+    .label {
+      position: absolute;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 18px;
+      border: 1px solid #0ff;
+      z-index: 1000;
+    }
+
+    #coords {
+      top: 50px;
+      left: 10px;
+    }
+
+    #profgrid {
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 36px;
+    }
+
+    #directory {
+      top: 50px;
+      right: 10px;
+    }
+
+    #back-to-profile {
+      top: 10px;
+      left: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: block;
+    }
+
+    #back-to-profile:hover {
+      background-color: rgba(0, 255, 255, 0.2);
+      box-shadow: 0 0 10px #0ff;
+    }
+
+    /* Player Stats UI */
+    #player-stats {
+      position: absolute;
+      top: 100px;
+      left: 10px;
+      background-color: rgba(0, 0, 0, 0.8);
+      border: 1px solid #0ff;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 12px;
+      z-index: 1000;
+    }
+
+    /* Inventory UI */
+    #inventory {
+      position: absolute;
+      top: 100px;
+      right: 10px;
+      background-color: rgba(0, 0, 0, 0.8);
+      border: 1px solid #0ff;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 12px;
+      z-index: 1000;
+      max-width: 200px;
+    }
+
+    .inventory-item {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      margin: 2px;
+      border: 1px solid #0ff;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .item-count {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      font-size: 8px;
+      background: rgba(0,0,0,0.8);
+      color: #0ff;
+      padding: 1px;
+    }
+
+    #user-dropdown {
+      background-color: rgba(0, 0, 0, 0.8);
+      color: #0ff;
+      border: 1px solid #0ff;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 18px;
+      padding: 5px;
+    }
+
+    #user-dropdown option {
+      background-color: #111;
+      color: #0ff;
+    }
+
+    #game-container {
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #game-world {
+      position: absolute;
+      display: grid;
+      grid-template-columns: repeat(1000, 20px);
+      grid-template-rows: repeat(1000, 20px);
+      transform-origin: top left;
+    }
+
+    .tile {
+      width: 20px;
+      height: 20px;
+      background-color: #222;
+      border: 1px solid #333;
+      position: relative;
+    }
+
+    /* CSS Pixel Art Player Character */
+    .player {
+      background: linear-gradient(
+        to bottom,
+        #8B4513 0%, #8B4513 15%,
+        #FDBCB4 15%, #FDBCB4 35%,
+        #4169E1 35%, #4169E1 65%,
+        #2F4F4F 65%, #2F4F4F 85%,
+        #8B4513 85%, #8B4513 100%
+      ) !important;
+      border: 1px solid #000 !important;
+      box-shadow: 
+        inset 2px 4px 0 0 #000,
+        inset 4px 4px 0 0 #000,
+        inset 3px 6px 0 0 #CD853F,
+        inset 2px 7px 0 0 #8B0000,
+        inset 3px 7px 0 0 #8B0000,
+        inset 4px 7px 0 0 #8B0000,
+        inset 0 12px 0 0 #8B4513,
+        inset 1px 9px 0 0 #1E90FF,
+        inset 5px 9px 0 0 #1E90FF,
+        0 0 8px #0ff;
+    }
+
+    .player-warrior {
+      background: linear-gradient(
+        to bottom,
+        #654321 0%, #654321 15%,
+        #FDBCB4 15%, #FDBCB4 35%,
+        #DC143C 35%, #DC143C 65%,
+        #696969 65%, #696969 85%,
+        #2F4F4F 85%, #2F4F4F 100%
+      ) !important;
+      border: 1px solid #000 !important;
+      box-shadow: 
+        inset 2px 4px 0 0 #000,
+        inset 4px 4px 0 0 #000,
+        inset 0 12px 0 0 #FFD700,
+        0 0 8px #ff6b6b;
+    }
+
+    .player-mage {
+      background: linear-gradient(
+        to bottom,
+        #DDA0DD 0%, #DDA0DD 15%,
+        #FDBCB4 15%, #FDBCB4 35%,
+        #4B0082 35%, #4B0082 65%,
+        #4B0082 65%, #4B0082 85%,
+        #2F4F4F 85%, #2F4F4F 100%
+      ) !important;
+      border: 1px solid #000 !important;
+      box-shadow: 
+        inset 2px 4px 0 0 #000,
+        inset 4px 4px 0 0 #000,
+        inset 0 12px 0 0 #FFD700,
+        inset 2px 10px 0 0 #9370DB,
+        inset 4px 10px 0 0 #9370DB,
+        0 0 8px #9370db;
+    }
+
+    /* Biome Terrain Types */
+    .terrain-grass {
+      background: linear-gradient(45deg, #228B22 25%, #32CD32 25%, #32CD32 50%, #228B22 50%, #228B22 75%, #32CD32 75%);
+      background-size: 4px 4px;
+      border-color: #1F5F1F;
+    }
+
+    .terrain-forest {
+      background: linear-gradient(45deg, #006400 25%, #228B22 25%, #228B22 50%, #006400 50%, #006400 75%, #228B22 75%);
+      background-size: 3px 3px;
+      border-color: #003300;
+      box-shadow: inset 0 0 3px rgba(0,50,0,0.7);
+    }
+
+    .terrain-water {
+      background: linear-gradient(45deg, #1E90FF 25%, #4169E1 25%, #4169E1 50%, #1E90FF 50%, #1E90FF 75%, #4169E1 75%);
+      background-size: 6px 6px;
+      animation: water-flow 3s infinite;
+      border-color: #0047AB;
+    }
+
+    .terrain-mountain {
+      background: linear-gradient(45deg, #696969 25%, #A9A9A9 25%, #A9A9A9 50%, #696969 50%, #696969 75%, #A9A9A9 75%);
+      background-size: 8px 8px;
+      border-color: #2F4F4F;
+      box-shadow: inset 2px 2px 0 0 rgba(255,255,255,0.3);
+    }
+
+    .terrain-desert {
+      background: linear-gradient(45deg, #F4A460 25%, #DEB887 25%, #DEB887 50%, #F4A460 50%, #F4A460 75%, #DEB887 75%);
+      background-size: 5px 5px;
+      border-color: #CD853F;
+    }
+
+    .terrain-snow {
+      background: linear-gradient(45deg, #F0F8FF 25%, #E6E6FA 25%, #E6E6FA 50%, #F0F8FF 50%, #F0F8FF 75%, #E6E6FA 75%);
+      background-size: 2px 2px;
+      border-color: #B0C4DE;
+      box-shadow: inset 0 0 3px rgba(255,255,255,0.7);
+    }
+
+    .terrain-lava {
+      background: linear-gradient(45deg, #FF4500 25%, #DC143C 25%, #DC143C 50%, #FF4500 50%, #FF4500 75%, #DC143C 75%);
+      background-size: 4px 4px;
+      animation: lava-bubble 2s infinite;
+      border-color: #8B0000;
+      box-shadow: 0 0 8px #FF4500;
+    }
+
+    /* Special Tiles */
+    .stair {
+      background: linear-gradient(
+        45deg,
+        #228B22 0%, #228B22 25%,
+        #32CD32 25%, #32CD32 50%,
+        #228B22 50%, #228B22 75%,
+        #32CD32 75%, #32CD32 100%
+      ) !important;
+      border: 1px solid #0f0;
+      box-shadow: 
+        inset 2px 2px 0 0 rgba(255,255,255,0.3),
+        inset 0 10px 0 0 #2F4F4F,
+        0 0 5px #0f0;
+    }
+
+    /* Loot Items */
+    .loot-wood {
+      background: linear-gradient(45deg, #8B4513 40%, #A0522D 60%);
+      box-shadow: inset 2px 2px 0 0 #DEB887, 0 0 5px #8B4513;
+      animation: item-bob 3s infinite;
+    }
+
+    .loot-stone {
+      background: radial-gradient(circle, #696969 40%, #2F4F4F 80%);
+      box-shadow: inset 2px 2px 0 0 #A9A9A9, 0 0 5px #696969;
+      animation: item-bob 3s infinite 0.5s;
+    }
+
+    .loot-iron {
+      background: radial-gradient(circle, #C0C0C0 40%, #696969 80%);
+      box-shadow: inset 2px 2px 0 0 #E5E5E5, 0 0 8px #C0C0C0;
+      animation: item-bob 3s infinite 1s;
+    }
+
+    .loot-gold {
+      background: radial-gradient(circle, #FFD700 40%, #B8860B 80%);
+      box-shadow: inset 2px 2px 0 0 #FFFF00, 0 0 12px #FFD700;
+      animation: item-sparkle 2s infinite;
+    }
+
+    .loot-gem {
+      background: radial-gradient(circle, #DC143C 30%, #8B0000 70%);
+      box-shadow: inset 2px 2px 0 0 #FF69B4, 0 0 15px #DC143C;
+      animation: gem-sparkle 3s infinite;
+    }
+
+    .loot-crystal {
+      background: linear-gradient(45deg, #E6E6FA 25%, #DDA0DD 25%, #DDA0DD 50%, #E6E6FA 50%, #E6E6FA 75%, #DDA0DD 75%);
+      background-size: 4px 4px;
+      box-shadow: inset 2px 2px 0 0 #FFF, 0 0 20px #DDA0DD;
+      animation: crystal-pulse 4s infinite;
+    }
+
+    /* Animations */
+    @keyframes water-flow {
+      0%, 100% { background-position: 0 0; }
+      50% { background-position: 6px 6px; }
+    }
+
+    @keyframes lava-bubble {
+      0%, 100% { box-shadow: 0 0 8px #FF4500; }
+      50% { box-shadow: 0 0 20px #FF6347, inset 0 0 5px #8B0000; }
+    }
+
+    @keyframes item-bob {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-2px); }
+    }
+
+    @keyframes item-sparkle {
+      0%, 80% { box-shadow: inset 2px 2px 0 0 #FFFF00, 0 0 12px #FFD700; }
+      90% { box-shadow: inset 2px 2px 0 0 #FFF, inset 1px 1px 0 0 #FFF, 0 0 25px #FFD700; }
+    }
+
+    @keyframes gem-sparkle {
+      0%, 80% { box-shadow: inset 2px 2px 0 0 #FF69B4, 0 0 15px #DC143C; }
+      90% { box-shadow: inset 2px 2px 0 0 #FFF, inset 1px 1px 0 0 #FFF, 0 0 30px #DC143C; }
+    }
+
+    @keyframes crystal-pulse {
+      0%, 100% { box-shadow: inset 2px 2px 0 0 #FFF, 0 0 20px #DDA0DD; }
+      50% { box-shadow: inset 2px 2px 0 0 #FFF, 0 0 35px #DDA0DD, 0 0 50px #E6E6FA; }
+    }
+
+    /* Mobile Controls */
+    #mobile-controls {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+    }
+
+    .control-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 60px);
+      grid-template-rows: repeat(3, 60px);
+      gap: 5px;
+    }
+
+    .control-btn {
+      background-color: rgba(0, 255, 255, 0.1);
+      border: 2px solid #0ff;
+      border-radius: 8px;
+      color: #0ff;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.1s ease;
+      touch-action: manipulation;
+    }
+
+    .control-btn:active {
+      background-color: rgba(0, 255, 255, 0.3);
+      box-shadow: 0 0 10px #0ff;
+      transform: scale(0.95);
+    }
+
+    .control-btn:hover {
+      background-color: rgba(0, 255, 255, 0.2);
+    }
+
+    #btn-up {
+      grid-column: 2;
+      grid-row: 1;
+    }
+
+    #btn-left {
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    #btn-right {
+      grid-column: 3;
+      grid-row: 2;
+    }
+
+    #btn-down {
+      grid-column: 2;
+      grid-row: 3;
+    }
+
+    /* Z-level controls */
+    #z-controls {
+      position: absolute;
+      bottom: 20px;
+      left: 20px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .z-control-btn {
+      background-color: rgba(0, 255, 255, 0.1);
+      border: 2px solid #0ff;
+      border-radius: 8px;
+      color: #0ff;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px;
+      height: 40px;
+      transition: all 0.1s ease;
+      touch-action: manipulation;
+    }
+
+    .z-control-btn:active {
+      background-color: rgba(0, 255, 255, 0.3);
+      box-shadow: 0 0 10px #0ff;
+      transform: scale(0.95);
+    }
+
+    .z-control-btn:hover {
+      background-color: rgba(0, 255, 255, 0.2);
+    }
+
+    /* Zoom Controls */
+    #zoom-controls {
+      position: absolute;
+      bottom: 20px;
+      left: 100px;
+      z-index: 1000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .zoom-control-btn {
+      background-color: rgba(0, 255, 255, 0.1);
+      border: 2px solid #0ff;
+      border-radius: 8px;
+      color: #0ff;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px;
+      height: 40px;
+      transition: all 0.1s ease;
+      touch-action: manipulation;
+    }
+
+    .zoom-control-btn:active {
+      background-color: rgba(0, 255, 255, 0.3);
+      box-shadow: 0 0 10px #0ff;
+      transform: scale(0.95);
+    }
+
+    .zoom-control-btn:hover {
+      background-color: rgba(0, 255, 255, 0.2);
+    }
+
+    /* Zoom level indicator */
+    #zoom-level {
+      position: absolute;
+      top: 200px;
+      left: 10px;
+      background-color: rgba(0, 0, 0, 0.8);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 18px;
+      border: 1px solid #0ff;
+      z-index: 1000;
+    }
+
+    /* Character Selection UI */
+    #character-selector {
+      position: absolute;
+      top: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: rgba(0, 0, 0, 0.9);
+      border: 2px solid #0ff;
+      border-radius: 8px;
+      padding: 15px;
+      z-index: 1001;
+      display: none;
+    }
+
+    .character-option {
+      display: inline-block;
+      width: 30px;
+      height: 30px;
+      margin: 5px;
+      cursor: pointer;
+      border: 2px solid #0ff;
+      transition: all 0.3s ease;
+    }
+
+    .character-option:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 15px #0ff;
+    }
+
+    /* Responsive adjustments for mobile */
+    @media (max-width: 768px) {
+      .label {
+        font-size: 12px;
+        padding: 6px 10px;
+      }
+
+      #profgrid {
+        top: 60px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 18px;
+        padding: 4px 12px;
+      }
+
+      #back-to-profile {
+        top: 5px;
+        left: 5px;
+        font-size: 12px;
+        padding: 6px 10px;
+      }
+
+      #coords {
+        top: 30px;
+        left: 5px;
+        font-size: 12px;
+        padding: 6px 10px;
+      }
+
+      #directory {
+        top: 5px;
+        right: 5px;
+        font-size: 12px;
+        padding: 4px 8px;
+      }
+
+      #user-dropdown {
+        font-size: 12px;
+        padding: 3px;
+      }
+
+      #player-stats, #inventory {
+        font-size: 10px;
+        padding: 5px;
+      }
+
+      #zoom-level {
+        top: 170px;
+        left: 5px;
+        font-size: 12px;
+        padding: 5px 8px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      #profgrid {
+        top: 55px;
+        font-size: 16px;
+        padding: 3px 10px;
+      }
+
+      #back-to-profile {
+        top: 3px;
+        left: 3px;
+        font-size: 11px;
+        padding: 5px 8px;
+      }
+
+      #coords {
+        top: 28px;
+        left: 3px;
+        font-size: 11px;
+        padding: 5px 8px;
+      }
+
+      #directory {
+        top: 3px;
+        right: 3px;
+        font-size: 11px;
+        padding: 3px 6px;
+      }
+
+      #user-dropdown {
+        font-size: 11px;
+        padding: 2px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <a href="#" id="back-to-profile" class="label">← Back to Profile</a>
+  <div id="profgrid" class="label">ProfGrid</div>
+  <div id="coords" class="label">XYZ: (500, 500, 0)</div>
+  <div id="zoom-level" class="label">Zoom: 1.0x</div>
+  <div id="directory" class="label">
+    <select id="user-dropdown">
+      <option value="">Grid Directory</option>
+      <option value="user1">User1 (250, 300, 0)</option>
+      <option value="user2">User2 (750, 400, 5)</option>
+      <option value="user3">User3 (100, 600, 10)</option>
+    </select>
+  </div>
+
+  <!-- Player Stats -->
+  <div id="player-stats">
+    <div>Level: <span id="player-level">1</span></div>
+    <div>XP: <span id="player-xp">0</span>/<span id="player-xp-next">100</span></div>
+    <div>Items: <span id="total-items">0</span></div>
+    <div>Biome: <span id="current-biome">Plains</span></div>
+  </div>
+
+  <!-- Inventory -->
+  <div id="inventory">
+    <div style="margin-bottom: 5px;">Inventory:</div>
+    <div id="inventory-grid"></div>
+  </div>
+
+  <!-- Character Selection -->
+  <div id="character-selector">
+    <div style="color: #0ff; margin-bottom: 10px; text-align: center;">Choose Character:</div>
+    <div class="character-option player" data-type="default"></div>
+    <div class="character-option player-warrior" data-type="warrior"></div>
+    <div class="character-option player-mage" data-type="mage"></div>
+  </div>
+
+  <!-- Mobile Controls -->
+  <div id="mobile-controls">
+    <div class="control-grid">
+      <div class="control-btn" id="btn-up">↑</div>
+      <div class="control-btn" id="btn-left">←</div>
+      <div class="control-btn" id="btn-right">→</div>
+      <div class="control-btn" id="btn-down">↓</div>
+    </div>
+  </div>
+
+  <!-- Z-level Controls -->
+  <div id="z-controls">
+    <div class="z-control-btn" id="btn-up-z">W ↑</div>
+    <div class="z-control-btn" id="btn-down-z">S ↓</div>
+  </div>
+
+  <!-- Zoom Controls -->
+  <div id="zoom-controls">
+    <div class="zoom-control-btn" id="btn-zoom-in">Z +</div>
+    <div class="zoom-control-btn" id="btn-zoom-out">X -</div>
+  </div>
+
+  <div id="game-container">
+    <div id="game-world"></div>
+  </div>
+
+  <script>
+    // Game State
+    const player = { 
+      x: 500, y: 500, z: 0, 
+      type: 'default',
+      level: 1,
+      xp: 0,
+      xpNext: 100
+    };
+    
+    const inventory = {
+      wood: 0,
+      stone: 0,
+      iron: 0,
+      gold: 0,
+      gem: 0,
+      crystal: 0
+    };
+
+    let currentUserEmail = null;
+    let worldData = {};
+    let lootData = {};
+
+    // UI Elements
+    const coordsDisplay = document.getElementById('coords');
+    const gameWorld = document.getElementById('game-world');
+    const container = document.getElementById('game-container');
+    const userDropdown = document.getElementById('user-dropdown');
+    const backButton = document.getElementById('back-to-profile');
+    const characterSelector = document.getElementById('character-selector');
+    const playerStats = document.getElementById('player-stats');
+    const inventoryGrid = document.getElementById('inventory-grid');
+    const zoomLevelDisplay = document.getElementById('zoom-level');
+
+    const CUBE_SIZE = 1000;
+    let TILE_SIZE = 20;
+    let VIEW_RADIUS = 10;
+    let ZOOM_LEVEL = 1;
+    
+    // Zoom settings
+    const MIN_ZOOM = 0.25; // 4x zoomed out
+    const MAX_ZOOM = 4;    // 4x zoomed in
+    const ZOOM_STEP = 0.25;
+
+    // Biome Definitions
+    const BIOMES = {
+      PLAINS: { name: 'Plains', terrain: 'grass', lootChance: 0.02 },
+      FOREST: { name: 'Forest', terrain: 'forest', lootChance: 0.05 },
+      DESERT: { name: 'Desert', terrain: 'desert', lootChance: 0.01 },
+      MOUNTAIN: { name: 'Mountains', terrain: 'mountain', lootChance: 0.08 },
+      SNOW: { name: 'Tundra', terrain: 'snow', lootChance: 0.03 },
+      WATER: { name: 'Ocean', terrain: 'water', lootChance: 0.001 },
+      VOLCANIC: { name: 'Volcanic', terrain: 'lava', lootChance: 0.15 }
+    };
+
+    const LOOT_TYPES = ['wood', 'stone', 'iron', 'gold', 'gem', 'crystal'];
+    const LOOT_VALUES = { wood: 1, stone: 2, iron: 5, gold: 10, gem: 25, crystal: 50 };
+
+    // Noise function for terrain generation
+    function noise(x, y, scale = 0.1) {
+      const X = Math.floor(x * scale) & 255;
+      const Y = Math.floor(y * scale) & 255;
+      const u = fade(x * scale - Math.floor(x * scale));
+      const v = fade(y * scale - Math.floor(y * scale));
+      
+      const a = hash(X) + Y;
+      const b = hash(X + 1) + Y;
+      
+      return lerp(v, 
+        lerp(u, grad(hash(a), x * scale, y * scale), grad(hash(b), x * scale - 1, y * scale)),
+        lerp(u, grad(hash(a + 1), x * scale, y * scale - 1), grad(hash(b + 1), x * scale - 1, y * scale - 1))
+      );
+    }
+
+    function hash(n) {
+      n = ((n << 13) ^ n);
+      return (n * (n * n * 15731 + 789221) + 1376312589) & 0x7fffffff;
+    }
+
+    function fade(t) { return t * t * t * (t * (t * 6 - 15) + 10); }
+    function lerp(t, a, b) { return a + t * (b - a); }
+    function grad(hash, x, y) {
+      const h = hash & 15;
+      const u = h < 8 ? x : y;
+      const v = h < 4 ? y : h === 12 || h === 14 ? x : 0;
+      return ((h & 1) === 0 ? u : -u) + ((h & 2) === 0 ? v : -v);
+    }
+
+    // Terrain Generation
+    function generateTerrain(x, y, z) {
+      const key = `${x},${y},${z}`;
+      if (worldData[key]) return worldData[key];
+
+      // Multi-octave noise for realistic terrain
+      const elevation = 
+        noise(x, y, 0.01) * 0.5 +
+        noise(x, y, 0.02) * 0.25 +
+        noise(x, y, 0.04) * 0.125;
+
+      const temperature = 
+        noise(x + 1000, y + 1000, 0.008) * 0.6 +
+        noise(x + 1000, y + 1000, 0.016) * 0.4;
+
+      const moisture = 
+        noise(x + 2000, y + 2000, 0.012) * 0.7 +
+        noise(x + 2000, y + 2000, 0.024) * 0.3;
+
+      let biome;
+      
+      // Determine biome based on elevation, temperature, and moisture
+      if (elevation < -0.3) {
+        biome = BIOMES.WATER;
+      } else if (elevation > 0.4) {
+        if (temperature > 0.1) {
+          biome = BIOMES.VOLCANIC;
+        } else {
+          biome = BIOMES.MOUNTAIN;
+        }
+      } else if (temperature < -0.2) {
+        biome = BIOMES.SNOW;
+      } else if (moisture < -0.1) {
+        biome = BIOMES.DESERT;
+      } else if (moisture > 0.2 && elevation > 0.1) {
+        biome = BIOMES.FOREST;
+      } else {
+        biome = BIOMES.PLAINS;
+      }
+
+      worldData[key] = { biome, elevation, temperature, moisture };
+      return worldData[key];
+    }
+
+    // Loot Generation
+    function generateLoot(x, y, z) {
+      const key = `${x},${y},${z}`;
+      if (lootData[key] !== undefined) return lootData[key];
+
+      const terrain = generateTerrain(x, y, z);
+      const lootRoll = Math.random();
+
+      if (lootRoll < terrain.biome.lootChance) {
+        // Determine loot type based on biome
+        let lootType;
+        const biomeRoll = Math.random();
+
+        switch (terrain.biome) {
+          case BIOMES.FOREST:
+            lootType = biomeRoll < 0.7 ? 'wood' : biomeRoll < 0.9 ? 'stone' : 'iron';
+            break;
+          case BIOMES.MOUNTAIN:
+            lootType = biomeRoll < 0.4 ? 'stone' : biomeRoll < 0.7 ? 'iron' : biomeRoll < 0.9 ? 'gold' : 'gem';
+            break;
+          case BIOMES.VOLCANIC:
+            lootType = biomeRoll < 0.3 ? 'iron' : biomeRoll < 0.6 ? 'gold' : biomeRoll < 0.8 ? 'gem' : 'crystal';
+            break;
+          case BIOMES.DESERT:
+            lootType = biomeRoll < 0.6 ? 'stone' : biomeRoll < 0.8 ? 'gold' : 'gem';
+            break;
+          case BIOMES.SNOW:
+            lootType = biomeRoll < 0.5 ? 'stone' : biomeRoll < 0.8 ? 'iron' : 'crystal';
+            break;
+          default:
+            lootType = biomeRoll < 0.5 ? 'wood' : biomeRoll < 0.8 ? 'stone' : 'iron';
+        }
+
+        lootData[key] = lootType;
+        return lootType;
+      }
+
+      lootData[key] = null;
+      return null;
+    }
+
+    // Player Progression
+    function gainXP(amount) {
+      player.xp += amount;
+      
+      while (player.xp >= player.xpNext) {
+        player.xp -= player.xpNext;
+        player.level++;
+        player.xpNext = Math.floor(player.xpNext * 1.5);
+        
+        // Level up effect
+        showLevelUpEffect();
+      }
+      
+      updatePlayerStats();
+    }
+
+    function showLevelUpEffect() {
+      const effect = document.createElement('div');
+      effect.textContent = 'LEVEL UP!';
+      effect.style.cssText = `
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #FFD700;
+        font-size: 24px;
+        font-weight: bold;
+        z-index: 2000;
+        animation: levelUpEffect 2s ease-out forwards;
+        pointer-events: none;
+      `;
+      
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes levelUpEffect {
+          0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+          50% { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+          100% { opacity: 0; transform: translate(-50%, -50%) scale(1) translateY(-50px); }
+        }
+      `;
+      document.head.appendChild(style);
+      document.body.appendChild(effect);
+      
+      setTimeout(() => {
+        document.body.removeChild(effect);
+        document.head.removeChild(style);
+      }, 2000);
+    }
+
+    function collectLoot(x, y, z) {
+      const lootType = generateLoot(x, y, z);
+      if (lootType && lootData[`${x},${y},${z}`]) {
+        inventory[lootType]++;
+        lootData[`${x},${y},${z}`] = null; // Remove loot
+        gainXP(LOOT_VALUES[lootType]);
+        updateInventory();
+        
+        // Show collection effect
+        showCollectionEffect(lootType);
+        return true;
+      }
+      return false;
+    }
+
+    function showCollectionEffect(lootType) {
+      const effect = document.createElement('div');
+      effect.textContent = `+${lootType.toUpperCase()}`;
+      effect.style.cssText = `
+        position: absolute;
+        top: 40%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #0ff;
+        font-size: 16px;
+        font-weight: bold;
+        z-index: 2000;
+        animation: collectEffect 1s ease-out forwards;
+        pointer-events: none;
+      `;
+      
+      const style = document.createElement('style');
+      style.textContent = `
+        @keyframes collectEffect {
+          0% { opacity: 1; transform: translate(-50%, -50%); }
+          100% { opacity: 0; transform: translate(-50%, -50%) translateY(-30px); }
+        }
+      `;
+      document.head.appendChild(style);
+      document.body.appendChild(effect);
+      
+      setTimeout(() => {
+        document.body.removeChild(effect);
+        document.head.removeChild(style);
+      }, 1000);
+    }
+
+    function updatePlayerStats() {
+      document.getElementById('player-level').textContent = player.level;
+      document.getElementById('player-xp').textContent = player.xp;
+      document.getElementById('player-xp-next').textContent = player.xpNext;
+      
+      const totalItems = Object.values(inventory).reduce((sum, count) => sum + count, 0);
+      document.getElementById('total-items').textContent = totalItems;
+      
+      const terrain = generateTerrain(player.x, player.y, player.z);
+      document.getElementById('current-biome').textContent = terrain.biome.name;
+    }
+
+    function updateInventory() {
+      inventoryGrid.innerHTML = '';
+      
+      for (const [itemType, count] of Object.entries(inventory)) {
+        if (count > 0) {
+          const item = document.createElement('div');
+          item.className = `inventory-item loot-${itemType}`;
+          item.title = `${itemType}: ${count}`;
+          
+          if (count > 1) {
+            const countSpan = document.createElement('span');
+            countSpan.className = 'item-count';
+            countSpan.textContent = count;
+            item.appendChild(countSpan);
+          }
+          
+          inventoryGrid.appendChild(item);
+        }
+      }
+    }
+
+    // Zoom functions
+    function zoomIn() {
+      if (ZOOM_LEVEL < MAX_ZOOM) {
+        ZOOM_LEVEL += ZOOM_STEP;
+        updateZoom();
+      }
+    }
+
+    function zoomOut() {
+      if (ZOOM_LEVEL > MIN_ZOOM) {
+        ZOOM_LEVEL -= ZOOM_STEP;
+        updateZoom();
+      }
+    }
+
+    function updateZoom() {
+      // Update tile size and view radius based on zoom
+      TILE_SIZE = 20 * ZOOM_LEVEL;
+      VIEW_RADIUS = Math.ceil(10 / ZOOM_LEVEL);
+      
+      // Update zoom level display
+      zoomLevelDisplay.textContent = `Zoom: ${ZOOM_LEVEL.toFixed(2)}x`;
+      
+      // Re-render the world with new zoom settings
+      renderWorld();
+    }
+
+    // Initialize functions
+    function getCurrentUserEmail() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get("email");
+    }
+
+    function initializeBackButton() {
+      currentUserEmail = getCurrentUserEmail();
+      if (currentUserEmail) {
+        backButton.href = `/profile.html?email=${encodeURIComponent(currentUserEmail)}`;
+      } else {
+        backButton.href = '/index.html';
+      }
+    }
+
+    function setupCharacterSelection() {
+      const characterOptions = document.querySelectorAll('.character-option');
+      characterOptions.forEach(option => {
+        option.addEventListener('click', () => {
+          player.type = option.dataset.type;
+          characterSelector.style.display = 'none';
+          renderWorld();
+        });
+      });
+    }
+
+    function showCharacterSelector() {
+      characterSelector.style.display = 'block';
+    }
+
+    // User locations for teleportation
+    const userLocations = {
+      user1: { x: 250, y: 300, z: 0 },
+      user2: { x: 750, y: 400, z: 5 },
+      user3: { x: 100, y: 600, z: 10 }
+    };
+
+    // Stairs at (510, 500) on Z = 0 and Z = 10
+    const staircases = [
+      { x: 510, y: 500, z: 0 },
+      { x: 510, y: 500, z: 10 }
+    ];
+
+    userDropdown.addEventListener('change', (e) => {
+      const selectedUser = e.target.value;
+      if (selectedUser && userLocations[selectedUser]) {
+        const location = userLocations[selectedUser];
+        player.x = location.x;
+        player.y = location.y;
+        player.z = location.z;
+        renderWorld();
+        e.target.value = '';
+      }
+    });
+
+    function isOnStairs(x, y, z) {
+      return staircases.some(s => s.x === x && s.y === y && s.z === z);
+    }
+
+    function getPlayerClass() {
+      switch(player.type) {
+        case 'warrior': return 'player-warrior';
+        case 'mage': return 'player-mage';
+        default: return 'player';
+      }
+    }
+
+    function renderWorld() {
+      gameWorld.innerHTML = '';
+
+      const startX = Math.max(0, player.x - VIEW_RADIUS);
+      const startY = Math.max(0, player.y - VIEW_RADIUS);
+      const endX = Math.min(CUBE_SIZE, player.x + VIEW_RADIUS);
+      const endY = Math.min(CUBE_SIZE, player.y + VIEW_RADIUS);
+
+      gameWorld.style.gridTemplateColumns = `repeat(${endX - startX}, ${TILE_SIZE}px)`;
+      gameWorld.style.gridTemplateRows = `repeat(${endY - startY}, ${TILE_SIZE}px)`;
+
+      for (let y = startY; y < endY; y++) {
+        for (let x = startX; x < endX; x++) {
+          const tile = document.createElement('div');
+          tile.classList.add('tile');
+
+          // Generate terrain
+          const terrain = generateTerrain(x, y, player.z);
+          tile.classList.add(`terrain-${terrain.biome.terrain}`);
+
+          // Add stairs
+          if (isOnStairs(x, y, player.z)) {
+            tile.classList.remove(`terrain-${terrain.biome.terrain}`);
+            tile.classList.add('stair');
+          }
+
+          // Add loot
+          const loot = generateLoot(x, y, player.z);
+          if (loot) {
+            tile.classList.add(`loot-${loot}`);
+          }
+
+          // Add player
+          if (x === player.x && y === player.y) {
+            tile.classList.add(getPlayerClass());
+          }
+
+          gameWorld.appendChild(tile);
+        }
+      }
+
+      coordsDisplay.textContent = `XYZ: (${player.x}, ${player.y}, ${player.z})`;
+      updatePlayerStats();
+
+      const offsetX = (container.clientWidth / 2) - ((player.x - startX) * TILE_SIZE) - TILE_SIZE / 2;
+      const offsetY = (container.clientHeight / 2) - ((player.y - startY) * TILE_SIZE) - TILE_SIZE / 2;
+      gameWorld.style.left = `${offsetX}px`;
+      gameWorld.style.top = `${offsetY}px`;
+    }
+
+    function move(dx, dy, dz = 0) {
+      const newX = player.x + dx;
+      const newY = player.y + dy;
+      const newZ = player.z + dz;
+
+      if (newX >= 0 && newX < CUBE_SIZE) player.x = newX;
+      if (newY >= 0 && newY < CUBE_SIZE) player.y = newY;
+
+      if (dz !== 0 && isOnStairs(player.x, player.y, player.z)) {
+        const targetZ = player.z + dz;
+        if (targetZ >= 0 && isOnStairs(player.x, player.y, targetZ)) {
+          player.z = targetZ;
+        }
+      }
+
+      // Check for loot collection
+      collectLoot(player.x, player.y, player.z);
+
+      renderWorld();
+    }
+
+    // Keyboard controls
+    document.addEventListener('keydown', (e) => {
+      switch (e.key) {
+        case 'ArrowUp': move(0, -1); break;
+        case 'ArrowDown': move(0, 1); break;
+        case 'ArrowLeft': move(-1, 0); break;
+        case 'ArrowRight': move(1, 0); break;
+        case 'w': move(0, 0, 10); break;
+        case 's': move(0, 0, -10); break;
+        case 'z': zoomIn(); break;
+        case 'x': zoomOut(); break;
+        case 'c': showCharacterSelector(); break;
+      }
+    });
+
+    // Mobile touch controls
+    function setupMobileControls() {
+      document.getElementById('btn-up').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        move(0, -1);
+      });
+
+      document.getElementById('btn-down').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        move(0, 1);
+      });
+
+      document.getElementById('btn-left').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        move(-1, 0);
+      });
+
+      document.getElementById('btn-right').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        move(1, 0);
+      });
+
+      document.getElementById('btn-up-z').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        move(0, 0, 10);
+      });
+
+      document.getElementById('btn-down-z').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        move(0, 0, -10);
+      });
+
+      document.getElementById('btn-zoom-in').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        zoomIn();
+      });
+
+      document.getElementById('btn-zoom-out').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        zoomOut();
+      });
+
+      // Click events for desktop
+      document.getElementById('btn-up').addEventListener('click', () => move(0, -1));
+      document.getElementById('btn-down').addEventListener('click', () => move(0, 1));
+      document.getElementById('btn-left').addEventListener('click', () => move(-1, 0));
+      document.getElementById('btn-right').addEventListener('click', () => move(1, 0));
+      document.getElementById('btn-up-z').addEventListener('click', () => move(0, 0, 10));
+      document.getElementById('btn-down-z').addEventListener('click', () => move(0, 0, -10));
+      document.getElementById('btn-zoom-in').addEventListener('click', () => zoomIn());
+      document.getElementById('btn-zoom-out').addEventListener('click', () => zoomOut());
+    }
+
+    // Initialize the game
+    initializeBackButton();
+    setupMobileControls();
+    setupCharacterSelection();
+    showCharacterSelector();
+    updateInventory();
+    renderWorld();
+  </script>
+
+</body>
+</html>

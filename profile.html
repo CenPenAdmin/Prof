@@ -4,52 +4,409 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>User Profile</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #ff99cc, #cc66ff, #ffff99);
+      font-family: 'Trebuchet MS', sans-serif;
+      color: #330033;
+      padding: 50px;
+      text-align: center;
+      animation: backgroundPulse 10s infinite alternate;
+    }
+    @keyframes backgroundPulse {
+      0% {
+        background: linear-gradient(135deg, #ff99cc, #cc66ff, #ffff99);
+      }
+      100% {
+        background: linear-gradient(135deg, #ff6699, #9933ff, #ccff66);
+      }
+    }
+    h2 {
+      font-size: 3rem;
+      color: #660066;
+      text-shadow: 2px 2px #ffeeee;
+      margin-bottom: 30px;
+      animation: floatText 2s infinite ease-in-out alternate;
+    }
+    @keyframes floatText {
+      from { transform: translateY(0px); }
+      to { transform: translateY(-10px); }
+    }
+    #profile {
+      background-color: rgba(255, 255, 255, 0.85);
+      display: inline-block;
+      padding: 30px 50px;
+      border-radius: 20px;
+      box-shadow: 0 0 20px rgba(255, 105, 180, 0.5);
+      font-size: 1.2rem;
+      color: #330033;
+    }
+    #profile p {
+      margin: 10px 0;
+      line-height: 1.6;
+    }
+    button {
+      margin-top: 30px;
+      padding: 12px 25px;
+      font-size: 1rem;
+      background-color: #66cc66;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.3);
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+    button:hover {
+      background-color: #55aa55;
+      transform: scale(1.05);
+    }
+    /* Clown styles */
+    .clown {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      left: 0;
+      top: 0;
+      z-index: 10;
+      animation: clownWiggle 1.2s infinite alternate, clownColor 3s infinite alternate;
+    }
+    @keyframes clownWiggle {
+      0% { transform: rotate(-8deg) scale(1.1);}
+      100% { transform: rotate(8deg) scale(0.9);}
+    }
+    @keyframes clownColor {
+      0% { filter: hue-rotate(0deg);}
+      100% { filter: hue-rotate(360deg);}
+    }
+    .clown1 { left: 40px; top: 40px; }
+    .clown2 { right: 40px; top: 60px; }
+    .clown3 { left: 60px; bottom: 60px; }
+    .clown4 { right: 60px; bottom: 40px; }
+    .clown5 { left: 50%; top: 10px; transform: translateX(-50%); }
+    .clown::before {
+      content: '';
+      display: block;
+      position: absolute;
+      left: 5px; top: 5px;
+      width: 50px; height: 50px;
+      background: #fff;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #ffccff, 0 0 20px #ff3399;
+    }
+    .clown::after {
+      content: '';
+      display: block;
+      position: absolute;
+      left: 22px; top: 30px;
+      width: 16px; height: 8px;
+      border-bottom: 3px solid #ff3399;
+      border-radius: 0 0 16px 16px;
+    }
+    .clown1::after { border-bottom: 3px solid #ffcc00; }
+    .clown2::after { border-bottom: 3px solid #66ccff; }
+    .clown3::after { border-bottom: 3px solid #ff3399; }
+    .clown4::after { border-bottom: 3px solid #ffccff; }
+    .clown5::after { border-bottom: 3px solid #ff3399; }
+    .clown .eye {
+      position: absolute;
+      width: 8px; height: 8px;
+      background: #333;
+      border-radius: 50%;
+      top: 22px;
+      animation: eyeBlink 2s infinite;
+    }
+    .clown .eye.left { left: 18px; }
+    .clown .eye.right { left: 34px; }
+    @keyframes eyeBlink {
+      0%, 90% { height: 8px;}
+      95%, 100% { height: 2px;}
+    }
+    .clown .nose {
+      position: absolute;
+      left: 26px; top: 32px;
+      width: 10px; height: 10px;
+      background: #ff3333;
+      border-radius: 50%;
+      box-shadow: 0 0 5px #ff3399;
+      animation: nosePulse 1.5s infinite alternate;
+    }
+    @keyframes nosePulse {
+      0% { transform: scale(1);}
+      100% { transform: scale(1.2);}
+    }
+    .clown .cheek {
+      position: absolute;
+      width: 8px; height: 5px;
+      background: #ffccff;
+      border-radius: 50%;
+      top: 38px;
+      box-shadow: 0 0 5px #ff99cc;
+    }
+    .clown .cheek.left { left: 14px; }
+    .clown .cheek.right { left: 38px; }
+    #profileWrapper {
+      position: relative;
+      display: inline-block;
+    }
+    #gameBtn {
+      position: absolute;
+      left: 100%;
+      top: 30px;
+      margin-left: 16px;
+      width: 120px;
+      height: 120px;
+      background: #3399ff;
+      color: #fff;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      text-decoration: none;
+      box-shadow: 2px 2px 12px #888;
+      transition: background 0.2s, transform 0.2s;
+      z-index: 30;
+      font-family: 'Trebuchet MS', sans-serif;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-align: center;
+    }
+    #gameBtn:hover {
+      background: #2377cc;
+      transform: scale(1.08);
+    }
+    #radioBtn {
+      position: absolute;
+      left: 100%;
+      top: 170px;
+      margin-left: 16px;
+      width: 120px;
+      height: 120px;
+      background: #ff6699;
+      color: #fff;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      text-decoration: none;
+      box-shadow: 2px 2px 12px #888;
+      transition: background 0.2s, transform 0.2s;
+      z-index: 30;
+      font-family: 'Trebuchet MS', sans-serif;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-align: center;
+    }
+    #radioBtn:hover {
+      background: #e55588;
+      transform: scale(1.08);
+    }
+    #messengerBtn {
+      position: absolute;
+      left: 100%;
+      top: 310px;
+      margin-left: 16px;
+      width: 120px;
+      height: 120px;
+      background: #9966ff;
+      color: #fff;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      text-decoration: none;
+      box-shadow: 2px 2px 12px #888;
+      transition: background 0.2s, transform 0.2s;
+      z-index: 30;
+      font-family: 'Trebuchet MS', sans-serif;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-align: center;
+    }
+    #messengerBtn:hover {
+      background: #7744dd;
+      transform: scale(1.08);
+    }
+    #fileBtn {
+      position: absolute;
+      right: 100%;
+      top: 170px;
+      margin-right: 16px;
+      width: 120px;
+      height: 120px;
+      background: #ff9933;
+      color: #fff;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      text-decoration: none;
+      box-shadow: 2px 2px 12px #888;
+      transition: background 0.2s, transform 0.2s;
+      z-index: 30;
+      font-family: 'Trebuchet MS', sans-serif;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-align: center;
+    }
+    #fileBtn:hover {
+      background: #e67700;
+      transform: scale(1.08);
+    }
+    #coinsBtn {
+      position: absolute;
+      right: 100%;
+      top: 30px;
+      margin-right: 16px;
+      width: 120px;
+      height: 120px;
+      background: #ffcc00;
+      color: #000;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      text-decoration: none;
+      box-shadow: 2px 2px 12px #888;
+      transition: background 0.2s, transform 0.2s;
+      z-index: 30;
+      font-family: 'Trebuchet MS', sans-serif;
+      font-weight: bold;
+      letter-spacing: 2px;
+      text-align: center;
+    }
+    #coinsBtn:hover {
+      background: #e6b800;
+      transform: scale(1.08);
+    }
+    @media (max-width: 600px) {
+      #profileWrapper {
+        width: 100vw;
+        min-width: 0;
+      }
+      #gameBtn {
+        position: absolute;
+        left: calc(100vw - 90px);
+        top: 10px;
+        margin-left: 0;
+        width: 80px;
+        height: 80px;
+        font-size: 1rem;
+      }
+      #radioBtn {
+        position: absolute;
+        left: calc(100vw - 90px);
+        top: 110px;
+        margin-left: 0;
+        width: 80px;
+        height: 80px;
+        font-size: 1rem;
+      }
+      #messengerBtn {
+        position: absolute;
+        left: calc(100vw - 90px);
+        top: 210px;
+        margin-left: 0;
+        width: 80px;
+        height: 80px;
+        font-size: 1rem;
+      }
+      #fileBtn {
+        position: absolute;
+        right: calc(100vw - 90px);
+        top: 110px;
+        margin-right: 0;
+        width: 80px;
+        height: 80px;
+        font-size: 1rem;
+      }
+      #coinsBtn {
+        position: absolute;
+        right: calc(100vw - 90px);
+        top: 10px;
+        margin-right: 0;
+        width: 80px;
+        height: 80px;
+        font-size: 1rem;
+      }
+      #profile {
+        padding: 20px 5vw;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h2>PROF</h2>
-  <div id="profile"></div>
+  <!-- Clown Parade -->
+  <div class="clown clown1"></div>
+  <div class="clown clown2"></div>
+  <div class="clown clown3"></div>
+  <div class="clown clown4"></div>
+  <div class="clown clown5"></div>
 
-  <audio id="audioPlayer" controls></audio>
-
-
-  <!-- 🎙️ WAV File Upload Form -->
-  <h3>Upload Your WAV Audio File</h3>
-  <form id="uploadForm" enctype="multipart/form-data">
-    <input type="file" id="audio" name="audio" accept=".wav" required />
-    <button type="submit">Upload</button>
-  </form>
-  <p id="uploadStatus"></p>
-
+  <div id="profileWrapper" style="position:relative; display:inline-block;">
+    <h2>PROF</h2>
+    <div id="profile" style="position:relative;">
+      <div id="imageContainer" style="margin:0 auto 20px auto; width:120px;">
+        <form id="imageUploadForm" enctype="multipart/form-data" style="margin-bottom:10px;">
+          <label for="profileImage" id="imageLabel" style="
+            display:block;
+            width:120px;
+            height:120px;
+            background:#eee;
+            color:#888;
+            border-radius:15px;
+            border:2px dashed #ccc;
+            cursor:pointer;
+            font-size:1rem;
+            text-align:center;
+            line-height:120px;
+            position:relative;
+            overflow:hidden;
+            transition: border-color 0.3s;
+          ">
+            <span id="imageText" style="position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;">Click to add image</span>
+            <img id="userImage" src="" style="display:none;max-width:100%;max-height:100%;border-radius:15px;object-fit:cover;" />
+            <input type="file" id="profileImage" name="profileImage" accept="image/*" style="display:none;" />
+          </label>
+          <button type="submit" style="margin-top:8px;">Upload</button>
+        </form>
+        <p id="imageUploadStatus" style="margin:5px 0 0 0; font-size:0.95rem; color:#3399ff;"></p>
+      </div>
+      <p><strong>Name:</strong> <span id="profileName"></span></p>
+      <p><strong>Email:</strong> <span id="profileEmail"></span></p>
+    </div>
+    <!-- Link to the grid game -->
+    <a id="gameBtn" title="Play the Grid Game">Grid Game</a>
+    <!-- Link to the radio station -->
+    <a id="radioBtn" title="Listen to Radio Station">Breeze Radio</a>
+    <!-- Link to the messenger -->
+    <a id="messengerBtn" title="Open Messenger">Messages</a>
+    <!-- Link to the file sharing system -->
+    <a id="fileBtn" title="Collaborative File Sharing">Files</a>
+    <!-- Link to the ProfCoin mining -->
+    <a id="coinsBtn" title="Mine ProfCoins">Coins</a>
+  </div>
   <br />
   <button onclick="logout()">Log Out</button>
+
+  <div id="publicProfileSection" style="margin-top:40px;">
+    <h3>View Another User's Public Profile</h3>
+    <input type="email" id="publicEmail" placeholder="Enter user's email" />
+    <button id="viewPublicBtn">View Public Profile</button>
+    <div id="publicProfile"></div>
+  </div>
 
   <script>
     let currentEmail = null;
 
-    async function logLogin() {
-      if (!currentEmail) return;
-      await fetch('/api/log-login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: currentEmail })
-      });
-    }
-
-    async function logLogout() {
-      if (!currentEmail) return;
-      await fetch('/api/log-logout', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: currentEmail })
-      });
-    }
-
     function logout() {
-      logLogout();
       window.location.href = "/index.html";
     }
-
-    window.addEventListener('beforeunload', logLogout);
 
     async function loadProfile() {
       const params = new URLSearchParams(window.location.search);
@@ -61,59 +418,117 @@
       }
 
       currentEmail = email;
-      await logLogin();
 
       const res = await fetch(`/api/user/${encodeURIComponent(email)}`);
       const user = await res.json();
 
       if (res.ok) {
-        document.getElementById("profile").innerHTML = `
-          <p><strong>Name:</strong> ${user.name}</p>
-          <p><strong>Email:</strong> ${user.email}</p>
-        `;
+        document.getElementById("profileName").innerText = user.name;
+        document.getElementById("profileEmail").innerText = user.email;
+        
+        // Handle profile image loading
+        if (user.imageUrl) {
+          console.log("Loading user image:", user.imageUrl); // Debug log
+          const userImage = document.getElementById("userImage");
+          const imageText = document.getElementById("imageText");
+          
+          // Set up image load event handlers
+          userImage.onload = function() {
+            console.log("Image loaded successfully");
+            userImage.style.display = "block";
+            imageText.style.display = "none";
+          };
+          
+          userImage.onerror = function() {
+            console.error("Failed to load image:", user.imageUrl);
+            // Keep default placeholder if image fails to load
+          };
+          
+          userImage.src = user.imageUrl;
+        } else {
+          console.log("No imageUrl found for user");
+        }
+        // Set game link with user info
+        document.getElementById("gameBtn").href = `game.html?email=${encodeURIComponent(user.email)}&name=${encodeURIComponent(user.name)}`;
+        // Set radio link with user info
+        document.getElementById("radioBtn").href = `radio.html?email=${encodeURIComponent(user.email)}&name=${encodeURIComponent(user.name)}`;
+        // Set messenger link with user info
+        document.getElementById("messengerBtn").href = `messenger.html?email=${encodeURIComponent(user.email)}&name=${encodeURIComponent(user.name)}`;
+        // Set file sharing link with user info
+        document.getElementById("fileBtn").href = `file.html?user=${encodeURIComponent(user.email)}&project=default`;
+        // Set ProfCoin mining link with user info
+        document.getElementById("coinsBtn").href = `coins.html?user=${encodeURIComponent(user.email)}`;
       } else {
         alert("User not found. Redirecting to login.");
         window.location.href = "/index.html";
       }
     }
 
-    // 🎯 Handle File Upload
-    document.getElementById("uploadForm").addEventListener("submit", async (e) => {
+    loadProfile();
+
+    // Add clown face features to each clown
+    document.querySelectorAll('.clown').forEach(clown => {
+      clown.innerHTML = `
+        <div class="eye left"></div>
+        <div class="eye right"></div>
+        <div class="nose"></div>
+        <div class="cheek left"></div>
+        <div class="cheek right"></div>
+      `;
+    });
+
+    document.getElementById('viewPublicBtn').addEventListener('click', async () => {
+      const email = document.getElementById('publicEmail').value;
+      if (!email) {
+        alert("Please enter an email.");
+        return;
+      }
+      const res = await fetch(`/api/user/${encodeURIComponent(email)}`);
+      const user = await res.json();
+      const publicProfileDiv = document.getElementById("publicProfile");
+      if (res.ok) {
+        publicProfileDiv.innerHTML = `
+          <p><strong>Name:</strong> ${user.name}</p>
+          <p><strong>Email:</strong> ${user.email}</p>
+        `;
+      } else {
+        publicProfileDiv.innerHTML = `<p style="color:red;">User not found.</p>`;
+      }
+    });
+
+    // Image upload handling
+    document.getElementById('imageUploadForm').addEventListener('submit', async (e) => {
       e.preventDefault();
       if (!currentEmail) return;
 
       const formData = new FormData();
-      const fileInput = document.getElementById("audio");
-
+      const fileInput = document.getElementById("profileImage");
       if (!fileInput.files.length) {
-        alert("Please select a WAV file to upload.");
+        alert("Please select an image to upload.");
         return;
       }
+      formData.append("profileImage", fileInput.files[0]);
 
-      formData.append("audio", fileInput.files[0]);
-
-      const response = await fetch(`/api/upload-audio?email=${encodeURIComponent(currentEmail)}`, {
+      const response = await fetch(`/api/upload-image?email=${encodeURIComponent(currentEmail)}`, {
         method: "POST",
         body: formData
       });
-
       const result = await response.json();
 
       if (response.ok) {
-        document.getElementById("uploadStatus").innerText = "✅ Upload successful!";
-        // Set audio player source to the uploaded file
-        const audioUrl = `/uploads/${encodeURIComponent(currentEmail)}/audio.wav`;
-        const audioPlayer = document.getElementById("audioPlayer");
-        audioPlayer.src = audioUrl;
-        audioPlayer.load();
-        audioPlayer.style.display = "block";
+        document.getElementById("imageUploadStatus").innerText = "✅ Image uploaded!";
+        document.getElementById("userImage").src = result.imageUrl;
+        document.getElementById("userImage").style.display = "block";
+        document.getElementById("imageText").style.display = "none";
       } else {
-        document.getElementById("uploadStatus").innerText = "❌ Upload failed.";
+        document.getElementById("imageUploadStatus").innerText = "❌ Upload failed.";
         console.error(result);
       }
     });
 
-    loadProfile();
+    document.getElementById("profileImage").addEventListener("change", function() {
+      document.getElementById("imageUploadForm").requestSubmit();
+    });
   </script>
 </body>
 </html>

@@ -1,0 +1,1122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProfCoin Mining - Prof Network</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a3a 50%, #2d2d5a 100%);
+            color: #00ff00;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.8);
+            padding: 15px 20px;
+            border-bottom: 2px solid #00ff00;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #ffcc00;
+            text-shadow: 0 0 10px #ffcc00;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            border: 2px solid #00ff00;
+            background: #333;
+        }
+
+        .back-btn {
+            background: linear-gradient(45deg, #00aa00, #00ff00);
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px #00ff00;
+        }
+
+        .main-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 20px;
+        }
+
+        .mining-area {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #00ff00;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);
+        }
+
+        .stats-panel {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #ffcc00;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(255, 204, 0, 0.3);
+            height: fit-content;
+        }
+
+        .wallet-section {
+            background: rgba(0, 0, 0, 0.6);
+            border: 2px solid #00aaff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            box-shadow: 0 0 20px rgba(0, 170, 255, 0.3);
+        }
+
+        .wallet-address {
+            background: rgba(0, 170, 255, 0.1);
+            border: 1px solid #00aaff;
+            border-radius: 5px;
+            padding: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            word-break: break-all;
+            margin: 10px 0;
+            position: relative;
+        }
+
+        .copy-btn {
+            position: absolute;
+            right: 5px;
+            top: 5px;
+            background: #00aaff;
+            color: #000;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .copy-btn:hover {
+            background: #0088cc;
+        }
+
+        .wallet-tabs {
+            display: flex;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #00aaff;
+        }
+
+        .wallet-tab {
+            background: none;
+            border: none;
+            color: #888;
+            padding: 10px 15px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .wallet-tab.active {
+            color: #00aaff;
+            border-bottom-color: #00aaff;
+        }
+
+        .wallet-tab:hover {
+            color: #00aaff;
+        }
+
+        .wallet-content {
+            display: none;
+        }
+
+        .wallet-content.active {
+            display: block;
+        }
+
+        .transaction-item {
+            background: rgba(0, 170, 255, 0.1);
+            border-left: 3px solid #00aaff;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 5px;
+            font-size: 0.85rem;
+        }
+
+        .transaction-item.sent {
+            border-left-color: #ff4444;
+            background: rgba(255, 68, 68, 0.1);
+        }
+
+        .transaction-item.received {
+            border-left-color: #00ff00;
+            background: rgba(0, 255, 0, 0.1);
+        }
+
+        .send-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .wallet-input {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00aaff;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .wallet-input:focus {
+            outline: none;
+            border-color: #00ff00;
+            box-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+        }
+
+        .send-btn {
+            background: linear-gradient(45deg, #00aaff, #00ff00);
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 170, 255, 0.5);
+        }
+
+        .send-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .qr-code {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+
+        .balance-display {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(255, 204, 0, 0.1);
+            border-radius: 8px;
+            border: 1px solid #ffcc00;
+        }
+
+        .balance-amount {
+            font-size: 2.5rem;
+            color: #ffcc00;
+            text-shadow: 0 0 10px #ffcc00;
+            margin: 10px 0;
+        }
+
+        .mining-console {
+            background: #000;
+            border: 1px solid #00ff00;
+            border-radius: 8px;
+            padding: 15px;
+            height: 200px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .mining-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mine-btn {
+            flex: 1;
+            background: linear-gradient(45deg, #ff6600, #ffcc00);
+            color: #000;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+        }
+
+        .mine-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 102, 0, 0.5);
+        }
+
+        .mine-btn:disabled {
+            background: #666;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .mining-animation {
+            text-align: center;
+            margin: 20px 0;
+            font-size: 3rem;
+            height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pickaxe {
+            animation: mining 1s infinite;
+            color: #ffcc00;
+            text-shadow: 0 0 10px #ffcc00;
+        }
+
+        @keyframes mining {
+            0%, 100% { transform: rotate(-20deg) translateY(0); }
+            50% { transform: rotate(20deg) translateY(-10px); }
+        }
+
+        .hash-display {
+            background: rgba(0, 255, 0, 0.1);
+            border: 1px solid #00ff00;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            word-break: break-all;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding: 8px;
+            background: rgba(0, 255, 0, 0.1);
+            border-radius: 5px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #00ff00;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #00ff00, #ffcc00);
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .leaderboard {
+            margin-top: 20px;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            margin-bottom: 5px;
+            background: rgba(255, 204, 0, 0.1);
+            border-radius: 5px;
+            border-left: 3px solid #ffcc00;
+        }
+
+        .network-stats {
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        .difficulty-display {
+            text-align: center;
+            padding: 10px;
+            background: rgba(255, 0, 0, 0.1);
+            border: 1px solid #ff4444;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                padding: 10px;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+            
+            .balance-amount {
+                font-size: 2rem;
+            }
+
+            .wallet-section {
+                order: -1; /* Show wallet first on mobile */
+            }
+        }
+
+        /* Floating coins animation */
+        .floating-coin {
+            position: fixed;
+            font-size: 2rem;
+            color: #ffcc00;
+            animation: floatUp 3s ease-out forwards;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px) rotate(360deg);
+            }
+        }
+
+        .mining-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #ffcc00;
+            border-radius: 50%;
+            animation: particle 2s ease-out forwards;
+        }
+
+        @keyframes particle {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--random-x), var(--random-y)) scale(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="logo">⛏️ ProfCoin Mining Network</div>
+        <div class="user-info">
+            <img id="userAvatar" src="" alt="User Avatar" class="user-avatar" style="display: none;">
+            <div class="user-avatar" id="userAvatarFallback" style="display: flex; align-items: center; justify-content: center; color: #00ff00; font-weight: bold;">P</div>
+            <div>
+                <div id="userName" style="color: #00ff00; font-weight: bold;">Loading...</div>
+                <div style="font-size: 0.8rem; color: #888;">Miner Status: <span id="minerStatus">Offline</span></div>
+            </div>
+            <a href="#" id="backToProfile" class="back-btn">← Profile</a>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="mining-area">
+            <div class="balance-display">
+                <div style="color: #ffcc00; font-size: 1.2rem; margin-bottom: 5px;">💰 ProfCoin Balance</div>
+                <div class="balance-amount" id="coinBalance">0.00000000</div>
+                <div style="color: #888; font-size: 0.9rem;">PROF</div>
+            </div>
+
+            <div class="mining-console" id="miningConsole">
+                <div style="color: #ffcc00;">=== ProfCoin Mining Console ===</div>
+                <div>Waiting for miner to start...</div>
+            </div>
+
+            <div class="mining-controls">
+                <button id="mineBtn" class="mine-btn">🚀 Start Mining</button>
+                <button id="stopBtn" class="mine-btn" style="background: linear-gradient(45deg, #ff4444, #ff8888);" disabled>⏹️ Stop Mining</button>
+            </div>
+
+            <div class="mining-animation" id="miningAnimation">
+                <span id="pickaxe" style="display: none;">⛏️</span>
+            </div>
+
+            <div class="progress-bar">
+                <div class="progress-fill" id="miningProgress"></div>
+            </div>
+
+            <div class="hash-display" id="currentHash">
+                Current Hash: Waiting for mining to start...
+            </div>
+
+            <div class="difficulty-display">
+                <div>Network Difficulty: <span id="networkDifficulty">1024</span></div>
+                <div style="font-size: 0.8rem; color: #888;">Block Reward: 0.01 PROF</div>
+            </div>
+        </div>
+
+        <div class="stats-panel">
+            <h3 style="color: #ffcc00; margin-bottom: 15px;">📊 Mining Stats</h3>
+            
+            <div class="stat-item">
+                <span>Blocks Mined:</span>
+                <span id="blocksMined">0</span>
+            </div>
+            
+            <div class="stat-item">
+                <span>Hash Rate:</span>
+                <span id="hashRate">0 H/s</span>
+            </div>
+            
+            <div class="stat-item">
+                <span>Total Earned:</span>
+                <span id="totalEarned">0.00 PROF</span>
+            </div>
+            
+            <div class="stat-item">
+                <span>Mining Time:</span>
+                <span id="miningTime">00:00:00</span>
+            </div>
+
+            <div class="network-stats">
+                <h4 style="color: #00ff00; margin-bottom: 10px;">🌐 Network Stats</h4>
+                
+                <div class="stat-item">
+                    <span>Active Miners:</span>
+                    <span id="activeMiners">1</span>
+                </div>
+                
+                <div class="stat-item">
+                    <span>Network Hash Rate:</span>
+                    <span id="networkHashRate">256 H/s</span>
+                </div>
+                
+                <div class="stat-item">
+                    <span>Last Block:</span>
+                    <span id="lastBlock">#12847</span>
+                </div>
+            </div>
+
+            <div class="leaderboard">
+                <h4 style="color: #ffcc00; margin-bottom: 10px;">🏆 Top Miners</h4>
+                
+                <div class="leaderboard-item">
+                    <span>🥇 CryptoMaster</span>
+                    <span>127.45 PROF</span>
+                </div>
+                
+                <div class="leaderboard-item">
+                    <span>🥈 BlockChainer</span>
+                    <span>89.32 PROF</span>
+                </div>
+                
+                <div class="leaderboard-item">
+                    <span>🥉 HashHunter</span>
+                    <span>76.18 PROF</span>
+                </div>
+                
+                <div class="leaderboard-item" id="userRanking" style="border-left-color: #00ff00;">
+                    <span>👤 You</span>
+                    <span id="userLeaderboardBalance">0.00 PROF</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wallet Section -->
+        <div class="wallet-section">
+            <h3 style="color: #00aaff; margin-bottom: 15px;">💼 ProfCoin Wallet</h3>
+            
+            <div class="wallet-address">
+                <div style="color: #00aaff; font-size: 0.9rem; margin-bottom: 5px;">Your Wallet Address:</div>
+                <div id="walletAddress">Generating...</div>
+                <button class="copy-btn" id="copyAddressBtn" onclick="copyWalletAddress()">Copy</button>
+            </div>
+
+            <div class="wallet-tabs">
+                <button class="wallet-tab active" onclick="showWalletTab('overview')">Overview</button>
+                <button class="wallet-tab" onclick="showWalletTab('send')">Send</button>
+                <button class="wallet-tab" onclick="showWalletTab('receive')">Receive</button>
+                <button class="wallet-tab" onclick="showWalletTab('history')">History</button>
+            </div>
+
+            <div id="walletOverview" class="wallet-content active">
+                <div class="stat-item">
+                    <span>Available Balance:</span>
+                    <span id="walletBalance">0.00000000 PROF</span>
+                </div>
+                <div class="stat-item">
+                    <span>Pending Balance:</span>
+                    <span id="pendingBalance">0.00000000 PROF</span>
+                </div>
+                <div class="stat-item">
+                    <span>Total Received:</span>
+                    <span id="totalReceived">0.00000000 PROF</span>
+                </div>
+                <div class="stat-item">
+                    <span>Total Sent:</span>
+                    <span id="totalSent">0.00000000 PROF</span>
+                </div>
+            </div>
+
+            <div id="walletSend" class="wallet-content">
+                <form class="send-form" id="sendForm">
+                    <input type="text" class="wallet-input" id="recipientAddress" placeholder="Recipient wallet address" required>
+                    <input type="number" class="wallet-input" id="sendAmount" placeholder="Amount (PROF)" step="0.00000001" min="0.00000001" required>
+                    <textarea class="wallet-input" id="transactionNote" placeholder="Note (optional)" rows="2"></textarea>
+                    <button type="submit" class="send-btn" id="sendBtn">💸 Send ProfCoin</button>
+                </form>
+            </div>
+
+            <div id="walletReceive" class="wallet-content">
+                <div style="text-align: center;">
+                    <p style="color: #00aaff; margin-bottom: 10px;">Share this address to receive ProfCoins:</p>
+                    <div class="qr-code" id="qrCode">
+                        <div style="font-size: 3rem; color: #000;">📱</div>
+                        <div style="color: #000; font-size: 0.8rem; margin-top: 5px;">QR Code</div>
+                    </div>
+                    <button class="send-btn" onclick="copyWalletAddress()" style="width: 100%;">📋 Copy Address</button>
+                </div>
+            </div>
+
+            <div id="walletHistory" class="wallet-content">
+                <div id="transactionHistory">
+                    <div style="text-align: center; color: #888; padding: 20px;">
+                        No transactions yet
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Prof User Integration
+        let currentUser = null;
+        let miningActive = false;
+        let coinBalance = 0;
+        let blocksMined = 0;
+        let totalEarned = 0;
+        let miningStartTime = null;
+        let miningInterval = null;
+        let progressInterval = null;
+        let hashRate = 0;
+        let difficulty = 1024;
+
+        // Wallet variables
+        let walletAddress = '';
+        let walletPrivateKey = '';
+        let transactionHistory = [];
+        let pendingBalance = 0;
+        let totalReceived = 0;
+        let totalSent = 0;
+
+        // Initialize user session
+        function initializeUser() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userEmail = urlParams.get('user') || urlParams.get('email');
+
+            if (userEmail) {
+                loadUserProfile(userEmail);
+            } else {
+                // Redirect to profile if no user specified
+                window.location.href = '/profile.html';
+            }
+        }
+
+        // Load user profile from Prof system
+        async function loadUserProfile(email) {
+            try {
+                const response = await fetch(`/api/user/${encodeURIComponent(email)}`);
+                if (response.ok) {
+                    currentUser = await response.json();
+                    updateUserDisplay();
+                    loadUserMiningData();
+                } else {
+                    alert('User not found. Please check your Prof account.');
+                    window.location.href = '/profile.html';
+                }
+            } catch (error) {
+                console.error('Error loading user profile:', error);
+                document.getElementById('userName').textContent = email;
+                loadUserMiningData();
+            }
+        }
+
+        // Update user display in header
+        function updateUserDisplay() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = currentUser.name || currentUser.email;
+                
+                // Set user avatar
+                if (currentUser.imageUrl) {
+                    const avatarImg = document.getElementById('userAvatar');
+                    const avatarFallback = document.getElementById('userAvatarFallback');
+                    avatarImg.src = currentUser.imageUrl;
+                    avatarImg.style.display = 'block';
+                    avatarFallback.style.display = 'none';
+                } else {
+                    const avatarFallback = document.getElementById('userAvatarFallback');
+                    avatarFallback.textContent = (currentUser.name || currentUser.email).charAt(0).toUpperCase();
+                }
+
+                // Set back to profile link
+                document.getElementById('backToProfile').href = `/profile.html?email=${encodeURIComponent(currentUser.email)}`;
+                
+                // Update miner status
+                document.getElementById('minerStatus').textContent = 'Online';
+                document.getElementById('minerStatus').style.color = '#00ff00';
+            }
+        }
+
+        // Load user's mining data (simulate from localStorage)
+        function loadUserMiningData() {
+            const userEmail = currentUser?.email || 'unknown';
+            const savedData = localStorage.getItem(`profcoin_${userEmail}`);
+            
+            if (savedData) {
+                const data = JSON.parse(savedData);
+                coinBalance = data.coinBalance || 0;
+                blocksMined = data.blocksMined || 0;
+                totalEarned = data.totalEarned || 0;
+                transactionHistory = data.transactionHistory || [];
+                totalReceived = data.totalReceived || 0;
+                totalSent = data.totalSent || 0;
+            }
+            
+            // Generate or load wallet
+            generateWallet();
+            updateDisplay();
+            updateWalletDisplay();
+            updateTransactionHistory();
+        }
+
+        // Save user's mining data
+        function saveUserMiningData() {
+            const userEmail = currentUser?.email || 'unknown';
+            const data = {
+                coinBalance,
+                blocksMined,
+                totalEarned,
+                walletAddress,
+                walletPrivateKey,
+                transactionHistory,
+                totalReceived,
+                totalSent,
+                lastSaved: new Date().toISOString()
+            };
+            localStorage.setItem(`profcoin_${userEmail}`, JSON.stringify(data));
+        }
+
+        // Update all displays
+        function updateDisplay() {
+            document.getElementById('coinBalance').textContent = coinBalance.toFixed(8);
+            document.getElementById('blocksMined').textContent = blocksMined;
+            document.getElementById('totalEarned').textContent = totalEarned.toFixed(2) + ' PROF';
+            document.getElementById('userLeaderboardBalance').textContent = coinBalance.toFixed(2) + ' PROF';
+            document.getElementById('hashRate').textContent = hashRate + ' H/s';
+        }
+
+        // Generate wallet address and private key
+        function generateWallet() {
+            const userEmail = currentUser?.email || 'unknown';
+            const savedWallet = localStorage.getItem(`profcoin_wallet_${userEmail}`);
+            
+            if (savedWallet) {
+                const walletData = JSON.parse(savedWallet);
+                walletAddress = walletData.address;
+                walletPrivateKey = walletData.privateKey;
+            } else {
+                // Generate new wallet
+                walletPrivateKey = generateRandomHex(64);
+                walletAddress = 'PROF' + generateRandomHex(32);
+                
+                // Save wallet
+                const walletData = {
+                    address: walletAddress,
+                    privateKey: walletPrivateKey,
+                    created: new Date().toISOString()
+                };
+                localStorage.setItem(`profcoin_wallet_${userEmail}`, JSON.stringify(walletData));
+            }
+        }
+
+        // Generate random hex string
+        function generateRandomHex(length) {
+            const chars = '0123456789abcdef';
+            let result = '';
+            for (let i = 0; i < length; i++) {
+                result += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return result;
+        }
+
+        // Update wallet display
+        function updateWalletDisplay() {
+            document.getElementById('walletAddress').textContent = walletAddress;
+            document.getElementById('walletBalance').textContent = coinBalance.toFixed(8) + ' PROF';
+            document.getElementById('pendingBalance').textContent = pendingBalance.toFixed(8) + ' PROF';
+            document.getElementById('totalReceived').textContent = totalReceived.toFixed(8) + ' PROF';
+            document.getElementById('totalSent').textContent = totalSent.toFixed(8) + ' PROF';
+        }
+
+        // Copy wallet address to clipboard
+        function copyWalletAddress() {
+            navigator.clipboard.writeText(walletAddress).then(() => {
+                const btn = document.getElementById('copyAddressBtn');
+                const originalText = btn.textContent;
+                btn.textContent = 'Copied!';
+                btn.style.background = '#00ff00';
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.style.background = '#00aaff';
+                }, 2000);
+                addToConsole('📋 Wallet address copied to clipboard!', 'success');
+            }).catch(() => {
+                addToConsole('❌ Failed to copy address', 'error');
+            });
+        }
+
+        // Show wallet tab
+        function showWalletTab(tabName) {
+            // Hide all content
+            document.querySelectorAll('.wallet-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.wallet-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected content and tab
+            document.getElementById('wallet' + tabName.charAt(0).toUpperCase() + tabName.slice(1)).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Add transaction to history
+        function addTransaction(type, amount, address, note = '') {
+            const transaction = {
+                id: 'tx_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+                type: type, // 'sent', 'received', 'mined'
+                amount: amount,
+                address: address,
+                note: note,
+                timestamp: new Date().toISOString(),
+                status: 'confirmed'
+            };
+            
+            transactionHistory.unshift(transaction);
+            
+            if (type === 'received' || type === 'mined') {
+                totalReceived += amount;
+            } else if (type === 'sent') {
+                totalSent += amount;
+            }
+            
+            updateTransactionHistory();
+            updateWalletDisplay();
+            saveUserMiningData();
+            
+            return transaction;
+        }
+
+        // Update transaction history display
+        function updateTransactionHistory() {
+            const historyDiv = document.getElementById('transactionHistory');
+            
+            if (transactionHistory.length === 0) {
+                historyDiv.innerHTML = '<div style="text-align: center; color: #888; padding: 20px;">No transactions yet</div>';
+                return;
+            }
+            
+            historyDiv.innerHTML = transactionHistory.slice(0, 10).map(tx => {
+                const date = new Date(tx.timestamp).toLocaleDateString();
+                const time = new Date(tx.timestamp).toLocaleTimeString();
+                const typeEmoji = tx.type === 'sent' ? '📤' : tx.type === 'received' ? '📥' : '⛏️';
+                const typeColor = tx.type === 'sent' ? 'sent' : tx.type === 'received' ? 'received' : 'mined';
+                
+                return `
+                    <div class="transaction-item ${typeColor}">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: bold;">
+                                    ${typeEmoji} ${tx.type.charAt(0).toUpperCase() + tx.type.slice(1)}
+                                    <span style="font-size: 0.8rem; color: #888;">#${tx.id.slice(-8)}</span>
+                                </div>
+                                <div style="font-size: 0.8rem; color: #888;">${date} ${time}</div>
+                                ${tx.note ? `<div style="font-size: 0.8rem; color: #ccc; margin-top: 2px;">${tx.note}</div>` : ''}
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-weight: bold; color: ${tx.type === 'sent' ? '#ff4444' : '#00ff00'};">
+                                    ${tx.type === 'sent' ? '-' : '+'}${tx.amount.toFixed(8)} PROF
+                                </div>
+                                <div style="font-size: 0.7rem; color: #888;">
+                                    ${tx.type === 'sent' ? 'To:' : 'From:'} ${tx.address.slice(0, 12)}...
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Handle send form submission
+        function handleSendTransaction(event) {
+            event.preventDefault();
+            
+            const recipientAddress = document.getElementById('recipientAddress').value;
+            const amount = parseFloat(document.getElementById('sendAmount').value);
+            const note = document.getElementById('transactionNote').value;
+            
+            // Validation
+            if (!recipientAddress || !recipientAddress.startsWith('PROF')) {
+                addToConsole('❌ Invalid recipient address', 'error');
+                return;
+            }
+            
+            if (amount <= 0 || amount > coinBalance) {
+                addToConsole('❌ Invalid amount or insufficient balance', 'error');
+                return;
+            }
+            
+            if (recipientAddress === walletAddress) {
+                addToConsole('❌ Cannot send to your own address', 'error');
+                return;
+            }
+            
+            // Simulate transaction
+            coinBalance -= amount;
+            addTransaction('sent', amount, recipientAddress, note);
+            
+            // Clear form
+            document.getElementById('sendForm').reset();
+            
+            addToConsole(`💸 Sent ${amount.toFixed(8)} PROF to ${recipientAddress.slice(0, 12)}...`, 'success');
+            updateDisplay();
+            
+            // Simulate network confirmation
+            setTimeout(() => {
+                addToConsole('✅ Transaction confirmed on network', 'success');
+            }, 2000);
+        }
+
+        // Mining console logging
+        function addToConsole(message, type = 'info') {
+            const console = document.getElementById('miningConsole');
+            const timestamp = new Date().toLocaleTimeString();
+            const color = type === 'success' ? '#00ff00' : type === 'error' ? '#ff4444' : '#ffffff';
+            
+            console.innerHTML += `<div style="color: ${color};">[${timestamp}] ${message}</div>`;
+            console.scrollTop = console.scrollHeight;
+        }
+
+        // Generate random hash
+        function generateHash() {
+            const chars = '0123456789abcdef';
+            let hash = '';
+            for (let i = 0; i < 64; i++) {
+                hash += chars[Math.floor(Math.random() * chars.length)];
+            }
+            return hash;
+        }
+
+        // Check if hash meets difficulty
+        function isValidHash(hash, difficulty) {
+            const target = '0'.repeat(Math.floor(Math.log2(difficulty) / 4));
+            return hash.startsWith(target);
+        }
+
+        // Create floating coin animation
+        function createFloatingCoin(x, y) {
+            const coin = document.createElement('div');
+            coin.className = 'floating-coin';
+            coin.textContent = '💰';
+            coin.style.left = x + 'px';
+            coin.style.top = y + 'px';
+            document.body.appendChild(coin);
+            
+            setTimeout(() => {
+                document.body.removeChild(coin);
+            }, 3000);
+        }
+
+        // Start mining process
+        function startMining() {
+            if (miningActive) return;
+            
+            miningActive = true;
+            miningStartTime = Date.now();
+            document.getElementById('mineBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('pickaxe').style.display = 'block';
+            document.getElementById('pickaxe').className = 'pickaxe';
+            
+            addToConsole('🚀 Mining started! Searching for valid blocks...', 'success');
+            addToConsole(`Current difficulty: ${difficulty}`, 'info');
+            
+            let attempts = 0;
+            let progress = 0;
+            
+            miningInterval = setInterval(() => {
+                attempts++;
+                hashRate = Math.floor(attempts / ((Date.now() - miningStartTime) / 1000));
+                
+                const hash = generateHash();
+                document.getElementById('currentHash').textContent = `Current Hash: ${hash}`;
+                
+                progress = (progress + Math.random() * 10) % 100;
+                document.getElementById('miningProgress').style.width = progress + '%';
+                
+                if (Math.random() < 0.02) { // 2% chance to find a block
+                    const reward = 0.01 + (Math.random() * 0.005); // 0.01-0.015 PROF reward
+                    coinBalance += reward;
+                    totalEarned += reward;
+                    blocksMined++;
+                    
+                    // Add mining transaction to history
+                    addTransaction('mined', reward, 'Mining Network', `Block #${blocksMined} mined`);
+                    
+                    addToConsole(`⛏️ Block mined! Hash: ${hash.substring(0, 16)}...`, 'success');
+                    addToConsole(`💰 Reward: ${reward.toFixed(8)} PROF`, 'success');
+                    
+                    // Create floating coin animation
+                    createFloatingCoin(
+                        Math.random() * window.innerWidth,
+                        Math.random() * window.innerHeight
+                    );
+                    
+                    // Increase difficulty slightly
+                    difficulty = Math.floor(difficulty * 1.001);
+                    document.getElementById('networkDifficulty').textContent = difficulty;
+                    
+                    progress = 0;
+                    document.getElementById('miningProgress').style.width = '0%';
+                    
+                    updateDisplay();
+                    updateWalletDisplay();
+                    saveUserMiningData();
+                }
+                
+                updateDisplay();
+            }, 100);
+            
+            // Update mining time
+            progressInterval = setInterval(() => {
+                if (miningStartTime) {
+                    const elapsed = Date.now() - miningStartTime;
+                    const hours = Math.floor(elapsed / 3600000);
+                    const minutes = Math.floor((elapsed % 3600000) / 60000);
+                    const seconds = Math.floor((elapsed % 60000) / 1000);
+                    
+                    document.getElementById('miningTime').textContent = 
+                        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+
+        // Stop mining process
+        function stopMining() {
+            if (!miningActive) return;
+            
+            miningActive = false;
+            document.getElementById('mineBtn').disabled = false;
+            document.getElementById('stopBtn').disabled = true;
+            document.getElementById('pickaxe').style.display = 'none';
+            
+            if (miningInterval) {
+                clearInterval(miningInterval);
+                miningInterval = null;
+            }
+            
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
+            
+            addToConsole('⏹️ Mining stopped.', 'error');
+            addToConsole(`Total session earnings: ${((totalEarned) - parseFloat(localStorage.getItem(`profcoin_${currentUser?.email || 'unknown'}_session`) || 0)).toFixed(8)} PROF`, 'info');
+            
+            hashRate = 0;
+            updateDisplay();
+            saveUserMiningData();
+        }
+
+        // Event listeners
+        document.getElementById('mineBtn').addEventListener('click', startMining);
+        document.getElementById('stopBtn').addEventListener('click', stopMining);
+        document.getElementById('sendForm').addEventListener('submit', handleSendTransaction);
+
+        // Auto-save every 30 seconds
+        setInterval(() => {
+            if (miningActive) {
+                saveUserMiningData();
+            }
+        }, 30000);
+
+        // Simulate network activity
+        setInterval(() => {
+            const activeMiners = Math.floor(Math.random() * 50) + 10;
+            const networkHashRate = Math.floor(Math.random() * 1000) + 500;
+            const lastBlock = 12847 + Math.floor(Math.random() * 10);
+            
+            document.getElementById('activeMiners').textContent = activeMiners;
+            document.getElementById('networkHashRate').textContent = networkHashRate + ' H/s';
+            document.getElementById('lastBlock').textContent = '#' + lastBlock;
+        }, 5000);
+
+        // Initialize the application
+        initializeUser();
+
+        // Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            if (miningActive) {
+                saveUserMiningData();
+            }
+        });
+    </script>
+</body>
+</html>

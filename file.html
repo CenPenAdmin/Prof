@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROF File Share - Collaborative Workspace</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            height: calc(100vh - 140px);
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+
+        .file-workspace {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 5px;
+        }
+
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            background: rgba(102, 126, 234, 0.1);
+            border-color: #764ba2;
+        }
+
+        .upload-area.dragover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        .file-list {
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .file-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .file-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .file-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .file-name {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .file-type {
+            background: #667eea;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+        }
+
+        .file-meta {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .collaborators {
+            margin-bottom: 20px;
+        }
+
+        .collaborator-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .collaborator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #f8f9fa;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .collaborator-avatar {
+            width: 24px;
+            height: 24px;
+            background: #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 0.7rem;
+        }
+
+        .online-indicator {
+            width: 8px;
+            height: 8px;
+            background: #28a745;
+            border-radius: 50%;
+            margin-left: 5px;
+        }
+
+        .code-editor {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .editor-textarea {
+            flex: 1;
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            resize: none;
+            background: #f8f9fa;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .recent-activity {
+            margin-top: 20px;
+        }
+
+        .activity-item {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            font-size: 0.8rem;
+        }
+
+        .activity-time {
+            color: #666;
+            font-size: 0.7rem;
+        }
+
+        .version-history {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-top: 10px;
+        }
+
+        .version-item {
+            padding: 8px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+            background: #f0f0f0;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .version-item:hover {
+            background: #e0e0e0;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+                height: auto;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .close:hover {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">📁 PROF File Share</div>
+            <div class="user-info">
+                <img id="userAvatar" src="" alt="User Avatar" style="width: 40px; height: 40px; border-radius: 50%; background: #667eea; display: none;">
+                <div class="user-avatar" id="userAvatarFallback">P</div>
+                <div>
+                    <div id="userName">Loading...</div>
+                    <div style="font-size: 0.8rem; color: #666;">Online</div>
+                </div>
+                <a href="#" id="backToProfile" class="btn btn-small" style="margin-left: 15px;">← Profile</a>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="section-title">📤 Upload Files</div>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">☁️</div>
+                    <p><strong>Drop files here</strong></p>
+                    <p>or click to browse</p>
+                    <input type="file" id="fileInput" class="file-input" multiple>
+                </div>
+                <button class="btn btn-small" onclick="document.getElementById('fileInput').click()">
+                    Choose Files
+                </button>
+
+                <div class="collaborators">
+                    <div class="section-title">👥 Collaborators</div>
+                    <div class="collaborator-list" id="collaboratorList">
+                        <!-- Collaborators will be loaded dynamically -->
+                    </div>
+                    <button class="btn btn-small" onclick="inviteCollaborator()">+ Invite Prof User</button>
+                </div>
+
+                <div class="recent-activity">
+                    <div class="section-title">📋 Recent Activity</div>
+                    <div id="activityList">
+                        <!-- Activity will be loaded dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="file-workspace">
+                <div id="fileListView">
+                    <div class="section-title">📂 Shared Files</div>
+                    <div class="file-list" id="fileList">
+                        <!-- Files will be dynamically added here -->
+                    </div>
+                </div>
+
+                <div id="codeEditor" class="code-editor">
+                    <div class="editor-header">
+                        <div>
+                            <h3 id="editingFileName">Editing: index.html</h3>
+                            <span style="font-size: 0.8rem; color: #666;">Last saved: Just now</span>
+                        </div>
+                        <div>
+                            <button class="btn btn-small" onclick="showVersionHistory()">📈 Versions</button>
+                            <button class="btn btn-small" onclick="closeEditor()">✕ Close</button>
+                        </div>
+                    </div>
+                    <textarea id="codeTextarea" class="editor-textarea" placeholder="Start coding..."></textarea>
+                    <div class="editor-actions">
+                        <button class="btn" onclick="saveFile()">💾 Save</button>
+                        <button class="btn" onclick="shareFile()">🔗 Share</button>
+                        <button class="btn" onclick="downloadFile()">⬇️ Download</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for inviting collaborators -->
+    <div id="inviteModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('inviteModal')">&times;</span>
+            <h3>Invite Prof User to Project</h3>
+            <p>Enter Prof user email:</p>
+            <input type="email" id="inviteEmail" placeholder="user@example.com" style="width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px;">
+            <div style="margin-top: 20px;">
+                <button class="btn" onclick="sendInvite()">Send Invite</button>
+                <button class="btn" onclick="closeModal('inviteModal')" style="background: #6c757d;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal for version history -->
+    <div id="versionModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('versionModal')">&times;</span>
+            <h3>Version History</h3>
+            <div class="version-history">
+                <div class="version-item" onclick="loadVersion('v3')">
+                    <strong>Version 3</strong> - Current<br>
+                    <small>Modified by PROF User 2, 2 minutes ago</small>
+                </div>
+                <div class="version-item" onclick="loadVersion('v2')">
+                    <strong>Version 2</strong><br>
+                    <small>Modified by You, 1 hour ago</small>
+                </div>
+                <div class="version-item" onclick="loadVersion('v1')">
+                    <strong>Version 1</strong> - Initial<br>
+                    <small>Created by You, 2 hours ago</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Prof User Integration
+        let currentUser = null;
+        let projectId = null;
+        let collaborators = [];
+        let activityLog = [];
+
+        // Initialize user session
+        function initializeUser() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const userEmail = urlParams.get('user') || urlParams.get('email');
+            projectId = urlParams.get('project') || 'default';
+
+            if (userEmail) {
+                loadUserProfile(userEmail);
+            } else {
+                // Redirect to profile if no user specified
+                window.location.href = '/profile.html';
+            }
+        }
+
+        // Load user profile from Prof system
+        async function loadUserProfile(email) {
+            try {
+                const response = await fetch(`/api/user/${encodeURIComponent(email)}`);
+                if (response.ok) {
+                    currentUser = await response.json();
+                    updateUserDisplay();
+                    loadProjectData();
+                } else {
+                    alert('User not found. Please check your Prof account.');
+                    window.location.href = '/profile.html';
+                }
+            } catch (error) {
+                console.error('Error loading user profile:', error);
+                document.getElementById('userName').textContent = email;
+                loadProjectData();
+            }
+        }
+
+        // Update user display in header
+        function updateUserDisplay() {
+            if (currentUser) {
+                document.getElementById('userName').textContent = currentUser.name || currentUser.email;
+                
+                // Set user avatar
+                if (currentUser.imageUrl) {
+                    const avatarImg = document.getElementById('userAvatar');
+                    const avatarFallback = document.getElementById('userAvatarFallback');
+                    avatarImg.src = currentUser.imageUrl;
+                    avatarImg.style.display = 'block';
+                    avatarFallback.style.display = 'none';
+                } else {
+                    const avatarFallback = document.getElementById('userAvatarFallback');
+                    avatarFallback.textContent = (currentUser.name || currentUser.email).charAt(0).toUpperCase();
+                }
+
+                // Set back to profile link
+                document.getElementById('backToProfile').href = `/profile.html?email=${encodeURIComponent(currentUser.email)}`;
+            }
+        }
+
+        // Load project data and collaborators
+        async function loadProjectData() {
+            // Load collaborators for this project
+            await loadCollaborators();
+            await loadProjectFiles();
+            await loadActivityLog();
+        }
+
+        // Load project collaborators
+        async function loadCollaborators() {
+            // For now, simulate with current user - in real implementation, 
+            // this would load from a projects database
+            collaborators = [
+                {
+                    email: currentUser?.email || 'unknown@prof.com',
+                    name: currentUser?.name || 'You',
+                    imageUrl: currentUser?.imageUrl,
+                    isOwner: true,
+                    online: true
+                }
+            ];
+            updateCollaboratorsList();
+        }
+
+        // Update collaborators display
+        function updateCollaboratorsList() {
+            const collaboratorList = document.getElementById('collaboratorList');
+            collaboratorList.innerHTML = '';
+
+            collaborators.forEach(collaborator => {
+                const collabDiv = document.createElement('div');
+                collabDiv.className = 'collaborator';
+                
+                const avatarDiv = document.createElement('div');
+                avatarDiv.className = 'collaborator-avatar';
+                
+                if (collaborator.imageUrl) {
+                    avatarDiv.style.backgroundImage = `url(${collaborator.imageUrl})`;
+                    avatarDiv.style.backgroundSize = 'cover';
+                    avatarDiv.style.backgroundPosition = 'center';
+                } else {
+                    avatarDiv.textContent = (collaborator.name || collaborator.email).charAt(0).toUpperCase();
+                }
+
+                const nameSpan = document.createElement('span');
+                nameSpan.textContent = collaborator.isOwner ? 'You' : collaborator.name || collaborator.email;
+
+                collabDiv.appendChild(avatarDiv);
+                collabDiv.appendChild(nameSpan);
+
+                if (collaborator.online) {
+                    const onlineIndicator = document.createElement('div');
+                    onlineIndicator.className = 'online-indicator';
+                    collabDiv.appendChild(onlineIndicator);
+                }
+
+                collaboratorList.appendChild(collabDiv);
+            });
+        }
+
+        // Load project files (enhanced to include project context)
+        async function loadProjectFiles() {
+            // In a real implementation, this would load files specific to the project
+            // For now, we'll use the existing sample data but enhance it
+            files.forEach(file => {
+                file.projectId = projectId;
+                file.collaborators = collaborators.map(c => c.email);
+            });
+            renderFileList();
+        }
+
+        // Load activity log
+        async function loadActivityLog() {
+            // Simulate recent activity for the project
+            activityLog = [
+                {
+                    user: collaborators[0]?.name || 'You',
+                    action: 'created project',
+                    target: projectId,
+                    timestamp: new Date(Date.now() - 5 * 60000) // 5 minutes ago
+                }
+            ];
+            updateActivityDisplay();
+        }
+
+        // Update activity display
+        function updateActivityDisplay() {
+            const activityList = document.getElementById('activityList');
+            activityList.innerHTML = '';
+
+            activityLog.slice(0, 5).forEach(activity => {
+                const activityDiv = document.createElement('div');
+                activityDiv.className = 'activity-item';
+                activityDiv.innerHTML = `
+                    <div>${activity.user} ${activity.action} "${activity.target}"</div>
+                    <div class="activity-time">${getTimeAgo(activity.timestamp)}</div>
+                `;
+                activityList.appendChild(activityDiv);
+            });
+        }
+
+        // Utility function to get time ago
+        function getTimeAgo(timestamp) {
+            const now = new Date();
+            const diff = now - timestamp;
+            const minutes = Math.floor(diff / 60000);
+            
+            if (minutes < 1) return 'Just now';
+            if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+            
+            const hours = Math.floor(minutes / 60);
+            if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+            
+            const days = Math.floor(hours / 24);
+            return `${days} day${days === 1 ? '' : 's'} ago`;
+        }
+
+        // Enhanced invite functionality for Prof users
+        async function sendInvite() {
+            const email = document.getElementById('inviteEmail').value.trim();
+            if (!email) {
+                alert('Please enter a valid Prof user email.');
+                return;
+            }
+
+            try {
+                // Check if the user exists in Prof system
+                const response = await fetch(`/api/user/${encodeURIComponent(email)}`);
+                if (response.ok) {
+                    const invitedUser = await response.json();
+                    
+                    // Check if already a collaborator
+                    if (collaborators.some(c => c.email === email)) {
+                        alert('This user is already a collaborator on this project.');
+                        return;
+                    }
+
+                    // Add to collaborators list
+                    collaborators.push({
+                        email: invitedUser.email,
+                        name: invitedUser.name,
+                        imageUrl: invitedUser.imageUrl,
+                        isOwner: false,
+                        online: false // They'll appear online when they join
+                    });
+
+                    updateCollaboratorsList();
+
+                    // Add to activity log
+                    activityLog.unshift({
+                        user: 'You',
+                        action: 'invited',
+                        target: invitedUser.name || email,
+                        timestamp: new Date()
+                    });
+                    updateActivityDisplay();
+
+                    alert(`✅ Invitation sent to ${invitedUser.name || email}!`);
+                    closeModal('inviteModal');
+                    document.getElementById('inviteEmail').value = '';
+                } else {
+                    alert('❌ Prof user not found. Please check the email address.');
+                }
+            } catch (error) {
+                console.error('Error sending invite:', error);
+                alert('❌ Error sending invitation. Please try again.');
+            }
+        }
+
+        // Enhanced file operations with activity logging
+        function logActivity(action, target) {
+            activityLog.unshift({
+                user: 'You',
+                action: action,
+                target: target,
+                timestamp: new Date()
+            });
+            updateActivityDisplay();
+        }
+
+        // Override saveFile to include activity logging
+        const originalSaveFile = saveFile;
+        saveFile = function() {
+            originalSaveFile();
+            if (currentEditingFile) {
+                logActivity('edited', currentEditingFile.name);
+            }
+        };
+
+        // Override file upload to include activity logging
+        const originalHandleFiles = handleFiles;
+        handleFiles = function(fileList) {
+            Array.from(fileList).forEach(file => {
+                logActivity('uploaded', file.name);
+            });
+            originalHandleFiles(fileList);
+        };
+
+        // Override delete file to include activity logging
+        const originalDeleteFile = deleteFile;
+        deleteFile = function(fileId) {
+            const file = files.find(f => f.id === fileId);
+            if (file && confirm('Are you sure you want to delete this file?')) {
+                files = files.filter(f => f.id !== fileId);
+                renderFileList();
+                logActivity('deleted', file.name);
+                alert('🗑️ File deleted successfully!');
+            }
+        };
+
+        // Sample file data
+        let files = [
+            {
+                id: 1,
+                name: 'index.html',
+                type: 'HTML',
+                size: '2.4 KB',
+                lastModified: '2 minutes ago',
+                author: 'PROF User 2',
+                content: '<!DOCTYPE html>\n<html>\n<head>\n    <title>Our Project</title>\n</head>\n<body>\n    <h1>Hello World!</h1>\n</body>\n</html>'
+            },
+            {
+                id: 2,
+                name: 'style.css',
+                type: 'CSS',
+                size: '1.8 KB',
+                lastModified: '5 minutes ago',
+                author: 'You',
+                content: 'body {\n    font-family: Arial, sans-serif;\n    margin: 0;\n    padding: 20px;\n}\n\nh1 {\n    color: #333;\n    text-align: center;\n}'
+            },
+            {
+                id: 3,
+                name: 'script.js',
+                type: 'JS',
+                size: '1.2 KB',
+                lastModified: '10 minutes ago',
+                author: 'PROF User 3',
+                content: 'document.addEventListener("DOMContentLoaded", function() {\n    console.log("Page loaded!");\n    \n    // Add your JavaScript here\n});'
+            },
+            {
+                id: 4,
+                name: 'README.md',
+                type: 'MD',
+                size: '856 B',
+                lastModified: '1 hour ago',
+                author: 'You',
+                content: '# Our Collaborative Project\n\nThis is a shared workspace for our team.\n\n## Files\n- index.html - Main page\n- style.css - Styling\n- script.js - JavaScript functionality'
+            }
+        ];
+
+        let currentEditingFile = null;
+
+        // Initialize the file list
+        function renderFileList() {
+            const fileList = document.getElementById('fileList');
+            fileList.innerHTML = '';
+
+            files.forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                fileItem.innerHTML = `
+                    <div class="file-header">
+                        <div class="file-name">${file.name}</div>
+                        <div class="file-type">${file.type}</div>
+                    </div>
+                    <div class="file-meta">
+                        ${file.size} • Modified by ${file.author} • ${file.lastModified}
+                    </div>
+                    <div class="file-actions">
+                        <button class="btn btn-small" onclick="editFile(${file.id})">✏️ Edit</button>
+                        <button class="btn btn-small" onclick="shareFile(${file.id})">🔗 Share</button>
+                        <button class="btn btn-small" onclick="downloadFile(${file.id})">⬇️ Download</button>
+                        <button class="btn btn-small" onclick="deleteFile(${file.id})" style="background: #dc3545;">🗑️ Delete</button>
+                    </div>
+                `;
+                fileList.appendChild(fileItem);
+            });
+        }
+
+        // File upload functionality
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+
+        uploadArea.addEventListener('click', () => fileInput.click());
+
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        // Edit file functionality
+        function editFile(fileId) {
+            const file = files.find(f => f.id === fileId);
+            if (!file) return;
+
+            currentEditingFile = file;
+            document.getElementById('fileListView').style.display = 'none';
+            document.getElementById('codeEditor').style.display = 'flex';
+            document.getElementById('editingFileName').textContent = `Editing: ${file.name}`;
+            document.getElementById('codeTextarea').value = file.content;
+        }
+
+        function closeEditor() {
+            document.getElementById('fileListView').style.display = 'block';
+            document.getElementById('codeEditor').style.display = 'none';
+            currentEditingFile = null;
+        }
+
+        function shareFile(fileId) {
+            const file = files.find(f => f.id === (fileId || currentEditingFile?.id));
+            if (!file) return;
+
+            const shareUrl = `${window.location.origin}/file.html?user=${encodeURIComponent(currentUser?.email || '')}&project=${projectId}&file=${fileId}`;
+            navigator.clipboard.writeText(shareUrl);
+            alert(`🔗 Share link copied to clipboard!\n${shareUrl}\n\nOther Prof users can use this link to collaborate on "${file.name}"`);
+        }
+
+        function downloadFile(fileId) {
+            const file = files.find(f => f.id === (fileId || currentEditingFile?.id));
+            if (!file) return;
+
+            const blob = new Blob([file.content], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = file.name;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Modal functions
+        function inviteCollaborator() {
+            document.getElementById('inviteModal').style.display = 'block';
+        }
+
+        function showVersionHistory() {
+            document.getElementById('versionModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        function loadVersion(version) {
+            alert(`📈 Loading ${version}...`);
+            closeModal('versionModal');
+        }
+
+        // Auto-save functionality
+        document.getElementById('codeTextarea').addEventListener('input', () => {
+            if (currentEditingFile) {
+                // Simulate auto-save (in real app, this would save to server)
+                setTimeout(() => {
+                    console.log('Auto-saved');
+                }, 1000);
+            }
+        });
+
+        // Initialize the app
+        initializeUser();
+
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
