@@ -1,0 +1,47 @@
+{
+  "id": "show_1753150327283",
+  "title": "Frigid",
+  "owner": "resident@cap.com",
+  "collaborators": [],
+  "description": "It’s cold",
+  "created": "2025-07-22T02:12:07.283Z",
+  "duration": 986,
+  "maxDuration": 3600,
+  "status": "published",
+  "tags": [],
+  "visibility": "public",
+  "allowDownload": false,
+  "plays": 0,
+  "likes": 0,
+  "scheduledSlot": 14,
+  "playlist": [
+    {
+      "id": "item_1753200554330",
+      "type": "music",
+      "file": "uploads/resident%40cap.com/music/1753200554327_Stunted.wav",
+      "duration": 566,
+      "title": "Stunted",
+      "artist": "resident@cap.com",
+      "owner": "resident@cap.com",
+      "uploadedBy": "resident@cap.com",
+      "order": 1,
+      "startTime": 0
+    },
+    {
+      "id": "item_1753150545362",
+      "type": "music",
+      "file": "uploads/resident%40cap.com/music/1753150545360_frigid1.wav",
+      "duration": 420,
+      "title": "frigid1",
+      "artist": "resident@cap.com",
+      "owner": "resident@cap.com",
+      "uploadedBy": "resident@cap.com",
+      "order": 2,
+      "startTime": 566
+    }
+  ],
+  "invitations": [],
+  "isCollaborative": false,
+  "currentTrackIndex": 0,
+  "playbackPosition": 0
+}

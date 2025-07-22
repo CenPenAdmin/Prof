@@ -5,5 +5,12 @@
     "latitude": 40.58682887458877,
     "longitude": -77.5774041448567
   },
-  "imageUrl": "/uploads/poop%40pee.com/profile.jpg"
+  "imageUrl": "/uploads/poop%40pee.com/profile.jpg",
+  "profcoinBalance": 0.6269658431168217,
+  "blocksMined": 50,
+  "totalEarned": 0.6269658431168217,
+  "lastMiningUpdate": "2025-07-21T00:40:59.196Z",
+  "miningActive": true,
+  "miningSessionId": "session_1753058429212_ibd7hek29",
+  "miningStartTime": "2025-07-20T18:32:34.651Z"
 }

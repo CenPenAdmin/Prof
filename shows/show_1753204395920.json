@@ -1,0 +1,36 @@
+{
+  "id": "show_1753204395920",
+  "title": "test2",
+  "owner": "deer@deer.com",
+  "djName": "test2",
+  "collaborators": [],
+  "description": "",
+  "created": "2025-07-22T17:13:15.920Z",
+  "duration": 86,
+  "maxDuration": 3600,
+  "status": "published",
+  "tags": [],
+  "visibility": "public",
+  "allowDownload": false,
+  "plays": 0,
+  "likes": 0,
+  "scheduledSlot": 18,
+  "playlist": [
+    {
+      "id": "item_1753204556862",
+      "type": "music",
+      "file": "uploads/deer%40deer.com/music/1753204556861_WHO_YA_WAS.mp3",
+      "duration": 86,
+      "title": "WHO YA WAS",
+      "artist": "deer@deer.com",
+      "owner": "deer@deer.com",
+      "uploadedBy": "deer@deer.com",
+      "order": 1,
+      "startTime": 0
+    }
+  ],
+  "invitations": [],
+  "isCollaborative": false,
+  "currentTrackIndex": 0,
+  "playbackPosition": 0
+}

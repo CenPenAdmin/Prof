@@ -208,10 +208,63 @@
     }
 
     .terrain-forest {
-      background: linear-gradient(45deg, #006400 25%, #228B22 25%, #228B22 50%, #006400 50%, #006400 75%, #228B22 75%);
-      background-size: 3px 3px;
+      background: 
+        radial-gradient(circle at 20% 30%, #228B22 15%, transparent 16%),
+        radial-gradient(circle at 80% 20%, #32CD32 12%, transparent 13%),
+        radial-gradient(circle at 40% 70%, #006400 18%, transparent 19%),
+        radial-gradient(circle at 70% 80%, #228B22 14%, transparent 15%),
+        radial-gradient(circle at 10% 80%, #2E8B57 16%, transparent 17%),
+        radial-gradient(circle at 90% 60%, #3CB371 13%, transparent 14%),
+        linear-gradient(45deg, #1B4B1C 25%, #2D5A2E 25%, #2D5A2E 50%, #1B4B1C 50%, #1B4B1C 75%, #2D5A2E 75%);
+      background-size: 
+        8px 8px,
+        10px 10px,
+        12px 12px,
+        9px 9px,
+        11px 11px,
+        7px 7px,
+        4px 4px;
+      background-position:
+        0 0,
+        3px 2px,
+        1px 4px,
+        5px 1px,
+        2px 6px,
+        7px 3px,
+        0 0;
       border-color: #003300;
-      box-shadow: inset 0 0 3px rgba(0,50,0,0.7);
+      box-shadow: inset 0 0 4px rgba(0,50,0,0.8), inset 1px 1px 2px rgba(50,205,50,0.3);
+      animation: forest-sway 6s infinite ease-in-out;
+    }
+    
+    @keyframes forest-sway {
+      0%, 100% { 
+        background-position:
+          0 0,
+          3px 2px,
+          1px 4px,
+          5px 1px,
+          2px 6px,
+          7px 3px,
+          0 0;
+      }
+      50% { 
+        background-position:
+          1px 0,
+          4px 1px,
+          0px 5px,
+          6px 0px,
+          1px 7px,
+          8px 2px,
+          0 0;
+      }
+    }
+
+    .terrain-path {
+      background: linear-gradient(45deg, #D2B48C 25%, #F5DEB3 25%, #F5DEB3 50%, #D2B48C 50%, #D2B48C 75%, #F5DEB3 75%);
+      background-size: 4px 4px;
+      border-color: #CD853F;
+      box-shadow: inset 0 0 2px rgba(139, 69, 19, 0.3);
     }
 
     .terrain-water {
@@ -434,57 +487,7 @@
       background-color: rgba(0, 255, 255, 0.2);
     }
 
-    /* Zoom Controls */
-    #zoom-controls {
-      position: absolute;
-      bottom: 20px;
-      left: 100px;
-      z-index: 1000;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
 
-    .zoom-control-btn {
-      background-color: rgba(0, 255, 255, 0.1);
-      border: 2px solid #0ff;
-      border-radius: 8px;
-      color: #0ff;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      user-select: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 60px;
-      height: 40px;
-      transition: all 0.1s ease;
-      touch-action: manipulation;
-    }
-
-    .zoom-control-btn:active {
-      background-color: rgba(0, 255, 255, 0.3);
-      box-shadow: 0 0 10px #0ff;
-      transform: scale(0.95);
-    }
-
-    .zoom-control-btn:hover {
-      background-color: rgba(0, 255, 255, 0.2);
-    }
-
-    /* Zoom level indicator */
-    #zoom-level {
-      position: absolute;
-      top: 200px;
-      left: 10px;
-      background-color: rgba(0, 0, 0, 0.8);
-      padding: 10px 20px;
-      border-radius: 8px;
-      font-size: 18px;
-      border: 1px solid #0ff;
-      z-index: 1000;
-    }
 
     /* Character Selection UI */
     #character-selector {
@@ -513,6 +516,99 @@
     .character-option:hover {
       transform: scale(1.1);
       box-shadow: 0 0 15px #0ff;
+    }
+
+    /* Map Overlay */
+    #map-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.95);
+      z-index: 2000;
+      display: none;
+      overflow: hidden;
+    }
+
+    #map-container {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 90vw;
+      height: 90vh;
+      background-color: rgba(17, 17, 17, 0.9);
+      border: 2px solid #0ff;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #map-header {
+      background-color: rgba(0, 255, 255, 0.1);
+      padding: 10px;
+      border-bottom: 1px solid #0ff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 18px;
+      color: #0ff;
+    }
+
+    #map-close-btn {
+      background-color: rgba(255, 0, 0, 0.2);
+      border: 2px solid #f00;
+      border-radius: 4px;
+      color: #f00;
+      font-size: 16px;
+      font-weight: bold;
+      padding: 5px 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    #map-close-btn:hover {
+      background-color: rgba(255, 0, 0, 0.4);
+      box-shadow: 0 0 10px #f00;
+    }
+
+    #map-canvas-container {
+      flex: 1;
+      position: relative;
+      overflow: auto;
+      background-color: #111;
+    }
+
+    #map-canvas {
+      display: block;
+      margin: 0 auto;
+      image-rendering: pixelated;
+      image-rendering: -moz-crisp-edges;
+      image-rendering: crisp-edges;
+    }
+
+    /* Map button */
+    #map-btn {
+      position: absolute;
+      top: 250px;
+      right: 10px;
+      background-color: rgba(0, 255, 255, 0.1);
+      border: 2px solid #0ff;
+      border-radius: 8px;
+      color: #0ff;
+      font-size: 14px;
+      font-weight: bold;
+      padding: 8px 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    #map-btn:hover {
+      background-color: rgba(0, 255, 255, 0.3);
+      box-shadow: 0 0 10px #0ff;
     }
 
     /* Responsive adjustments for mobile */
@@ -561,11 +657,11 @@
         padding: 5px;
       }
 
-      #zoom-level {
-        top: 170px;
-        left: 5px;
+      #map-btn {
+        top: 220px;
+        right: 5px;
         font-size: 12px;
-        padding: 5px 8px;
+        padding: 6px 10px;
       }
     }
 
@@ -601,6 +697,13 @@
         font-size: 11px;
         padding: 2px;
       }
+
+      #map-btn {
+        top: 200px;
+        right: 3px;
+        font-size: 11px;
+        padding: 5px 8px;
+      }
     }
   </style>
 </head>
@@ -608,8 +711,8 @@
 
   <a href="#" id="back-to-profile" class="label">← Back to Profile</a>
   <div id="profgrid" class="label">ProfGrid</div>
+  <button id="map-btn">Map</button>
   <div id="coords" class="label">XYZ: (500, 500, 0)</div>
-  <div id="zoom-level" class="label">Zoom: 1.0x</div>
   <div id="directory" class="label">
     <select id="user-dropdown">
       <option value="">Grid Directory</option>
@@ -657,20 +760,27 @@
     <div class="z-control-btn" id="btn-down-z">S ↓</div>
   </div>
 
-  <!-- Zoom Controls -->
-  <div id="zoom-controls">
-    <div class="zoom-control-btn" id="btn-zoom-in">Z +</div>
-    <div class="zoom-control-btn" id="btn-zoom-out">X -</div>
-  </div>
-
   <div id="game-container">
     <div id="game-world"></div>
+  </div>
+
+  <!-- Map Overlay -->
+  <div id="map-overlay">
+    <div id="map-container">
+      <div id="map-header">
+        <span id="map-title">World Map - Level 0</span>
+        <button id="map-close-btn">✕ Close</button>
+      </div>
+      <div id="map-canvas-container">
+        <canvas id="map-canvas"></canvas>
+      </div>
+    </div>
   </div>
 
   <script>
     // Game State
     const player = { 
-      x: 500, y: 500, z: 0, 
+      x: 50, y: 950, z: 0,  // Start near bottom left corner
       type: 'default',
       level: 1,
       xp: 0,
@@ -699,31 +809,124 @@
     const characterSelector = document.getElementById('character-selector');
     const playerStats = document.getElementById('player-stats');
     const inventoryGrid = document.getElementById('inventory-grid');
-    const zoomLevelDisplay = document.getElementById('zoom-level');
 
     const CUBE_SIZE = 1000;
     let TILE_SIZE = 20;
     let VIEW_RADIUS = 10;
-    let ZOOM_LEVEL = 1;
-    
-    // Zoom settings
-    const MIN_ZOOM = 0.25; // 4x zoomed out
-    const MAX_ZOOM = 4;    // 4x zoomed in
-    const ZOOM_STEP = 0.25;
 
     // Biome Definitions
     const BIOMES = {
-      PLAINS: { name: 'Plains', terrain: 'grass', lootChance: 0.02 },
-      FOREST: { name: 'Forest', terrain: 'forest', lootChance: 0.05 },
-      DESERT: { name: 'Desert', terrain: 'desert', lootChance: 0.01 },
-      MOUNTAIN: { name: 'Mountains', terrain: 'mountain', lootChance: 0.08 },
-      SNOW: { name: 'Tundra', terrain: 'snow', lootChance: 0.03 },
-      WATER: { name: 'Ocean', terrain: 'water', lootChance: 0.001 },
-      VOLCANIC: { name: 'Volcanic', terrain: 'lava', lootChance: 0.15 }
+      PLAINS: { name: 'Plains', terrain: 'grass', lootChance: 0.02, walkable: true },
+      FOREST: { name: 'Forest', terrain: 'forest', lootChance: 0.05, walkable: false },
+      PATH: { name: 'Forest Path', terrain: 'path', lootChance: 0.01, walkable: true },
+      DESERT: { name: 'Desert', terrain: 'desert', lootChance: 0.01, walkable: true },
+      MOUNTAIN: { name: 'Mountains', terrain: 'mountain', lootChance: 0.08, walkable: true },
+      SNOW: { name: 'Tundra', terrain: 'snow', lootChance: 0.03, walkable: true },
+      WATER: { name: 'Ocean', terrain: 'water', lootChance: 0.001, walkable: false },
+      VOLCANIC: { name: 'Volcanic', terrain: 'lava', lootChance: 0.15, walkable: true }
     };
 
     const LOOT_TYPES = ['wood', 'stone', 'iron', 'gold', 'gem', 'crystal'];
     const LOOT_VALUES = { wood: 1, stone: 2, iron: 5, gold: 10, gem: 25, crystal: 50 };
+
+    // Function to check if a position is on the forest path
+    function isOnForestPath(x, y) {
+      // Starting point near bottom left corner
+      const startX = 50;
+      const startY = 950;
+      
+      // Door location near top right corner
+      const doorX = 950;
+      const doorY = 50;
+      
+      // Narrower path width - 6 tiles, with wider areas for bends
+      const baseWidth = 6;
+      const bendWidth = 8; // Slightly wider for curves
+      
+      // Starting area - circular area around start point
+      const startArea = Math.sqrt((x - startX) * (x - startX) + (y - startY) * (y - startY)) <= 20;
+      
+      // Door area - circular area around door
+      const doorArea = Math.sqrt((x - doorX) * (x - doorX) + (y - doorY) * (y - doorY)) <= 18;
+      
+      // Path 1: Curved diagonal path with bends
+      const midPoint1X = 300;
+      const midPoint1Y = 700;
+      const midPoint2X = 650;
+      const midPoint2Y = 400;
+      
+      // First segment: start to first bend (with curve)
+      const segment1 = Math.abs((y - startY) - (x - startX) * (midPoint1Y - startY) / (midPoint1X - startX)) <= baseWidth;
+      const onSegment1 = segment1 && x >= startX && x <= midPoint1X && y >= midPoint1Y && y <= startY;
+      
+      // Curve at first bend
+      const curve1 = Math.sqrt((x - midPoint1X) * (x - midPoint1X) + (y - midPoint1Y) * (y - midPoint1Y)) <= bendWidth;
+      
+      // Second segment: first bend to second bend (with S-curve)
+      const curveOffset = Math.sin((x - midPoint1X) / 50) * 15; // S-curve effect
+      const segment2 = Math.abs((y - midPoint1Y + curveOffset) - (x - midPoint1X) * (midPoint2Y - midPoint1Y) / (midPoint2X - midPoint1X)) <= baseWidth;
+      const onSegment2 = segment2 && x >= midPoint1X && x <= midPoint2X && y >= midPoint2Y && y <= midPoint1Y;
+      
+      // Curve at second bend
+      const curve2 = Math.sqrt((x - midPoint2X) * (x - midPoint2X) + (y - midPoint2Y) * (y - midPoint2Y)) <= bendWidth;
+      
+      // Final segment: second bend to door
+      const segment3 = Math.abs((y - midPoint2Y) - (x - midPoint2X) * (doorY - midPoint2Y) / (doorX - midPoint2X)) <= baseWidth;
+      const onSegment3 = segment3 && x >= midPoint2X && x <= doorX && y >= doorY && y <= midPoint2Y;
+      
+      const path1 = onSegment1 || curve1 || onSegment2 || curve2 || onSegment3;
+      
+      // Path 2: Bottom edge then right edge with curves (raised away from border)
+      const bottomBendX = 750; // Bend point along bottom
+      const rightBendY = 200;  // Bend point along right side
+      const bottomPathY = 850; // Raised bottom path position (100 pixels from bottom border)
+      
+      // Bottom segment with gentle curve (raised away from border)
+      const bottomCurve = Math.sin((x - startX) / 100) * 8;
+      const bottomPath = Math.abs((y - bottomPathY) - bottomCurve) <= baseWidth && x >= startX && x <= bottomBendX;
+      
+      // Bottom corner bend (at raised position)
+      const bottomCorner = Math.sqrt((x - bottomBendX) * (x - bottomBendX) + (y - bottomPathY) * (y - bottomPathY)) <= bendWidth;
+      
+      // Right vertical segment with curve
+      const rightCurve = Math.sin((y - bottomPathY) / 80) * 12;
+      const rightPath = Math.abs((x - bottomBendX) - rightCurve) <= baseWidth && y >= rightBendY && y <= bottomPathY && x >= bottomBendX - 20 && x <= bottomBendX + 20;
+      
+      // Right corner bend (at raised position)
+      const rightCorner = Math.sqrt((x - bottomBendX) * (x - bottomBendX) + (y - rightBendY) * (y - rightBendY)) <= bendWidth;
+      
+      // Top connection to door with curve (connecting from raised bottom path)
+      const topConnectCurve = Math.sin((x - bottomBendX) / 60) * 10;
+      const topConnect = Math.abs((y - rightBendY) - topConnectCurve) <= baseWidth && x >= bottomBendX && x <= doorX && y >= doorY - 20 && y <= rightBendY + 20;
+      
+      const path2 = bottomPath || bottomCorner || rightPath || rightCorner || topConnect;
+      
+      // Path 3: Left edge then top edge with curves (connecting to diagonal path)
+      const leftBendY = 300;   // Bend point along left side
+      const topBendX = 300;    // Modified to match diagonal path's first bend point
+      
+      // Left vertical segment with wave
+      const leftWave = Math.sin((y - startY) / 90) * 10;
+      const leftPath = Math.abs((x - startX) - leftWave) <= baseWidth && y >= leftBendY && y <= startY && x >= startX - 20 && x <= startX + 20;
+      
+      // Left corner bend
+      const leftCorner = Math.sqrt((x - startX) * (x - startX) + (y - leftBendY) * (y - leftBendY)) <= bendWidth;
+      
+      // Top horizontal segment with gentle curve (connecting to diagonal path)
+      const topWave = Math.sin((x - startX) / 110) * 12;
+      const topPath = Math.abs((y - leftBendY) - topWave) <= baseWidth && x >= startX && x <= topBendX && y >= leftBendY - 20 && y <= leftBendY + 20;
+      
+      // Connection bend to merge with diagonal path at first midpoint
+      const connectBend = Math.sqrt((x - midPoint1X) * (x - midPoint1X) + (y - midPoint1Y) * (y - midPoint1Y)) <= bendWidth;
+      
+      // Connecting segment from top path to diagonal path's first bend
+      const connectSegment = Math.abs((y - leftBendY) - (x - topBendX) * (midPoint1Y - leftBendY) / (midPoint1X - topBendX)) <= baseWidth;
+      const onConnectSegment = connectSegment && x >= topBendX && x <= midPoint1X && y >= midPoint1Y && y <= leftBendY;
+      
+      const path3 = leftPath || leftCorner || topPath || connectBend || onConnectSegment;
+      
+      return startArea || doorArea || path1 || path2 || path3;
+    }
 
     // Noise function for terrain generation
     function noise(x, y, scale = 0.1) {
@@ -776,23 +979,34 @@
 
       let biome;
       
-      // Determine biome based on elevation, temperature, and moisture
-      if (elevation < -0.3) {
-        biome = BIOMES.WATER;
-      } else if (elevation > 0.4) {
-        if (temperature > 0.1) {
-          biome = BIOMES.VOLCANIC;
+      // Special case: Make the first floor (z=0) predominantly forest
+      if (z === 0) {
+        // Check if this position is on the forest path
+        if (isOnForestPath(x, y)) {
+          biome = BIOMES.PATH;
         } else {
-          biome = BIOMES.MOUNTAIN;
+          // Everything else is forest (no water, mountains, etc. on first floor)
+          biome = BIOMES.FOREST;
         }
-      } else if (temperature < -0.2) {
-        biome = BIOMES.SNOW;
-      } else if (moisture < -0.1) {
-        biome = BIOMES.DESERT;
-      } else if (moisture > 0.2 && elevation > 0.1) {
-        biome = BIOMES.FOREST;
       } else {
-        biome = BIOMES.PLAINS;
+        // Original biome logic for other floors
+        if (elevation < -0.3) {
+          biome = BIOMES.WATER;
+        } else if (elevation > 0.4) {
+          if (temperature > 0.1) {
+            biome = BIOMES.VOLCANIC;
+          } else {
+            biome = BIOMES.MOUNTAIN;
+          }
+        } else if (temperature < -0.2) {
+          biome = BIOMES.SNOW;
+        } else if (moisture < -0.1) {
+          biome = BIOMES.DESERT;
+        } else if (moisture > 0.2 && elevation > 0.1) {
+          biome = BIOMES.FOREST;
+        } else {
+          biome = BIOMES.PLAINS;
+        }
       }
 
       worldData[key] = { biome, elevation, temperature, moisture };
@@ -815,6 +1029,9 @@
         switch (terrain.biome) {
           case BIOMES.FOREST:
             lootType = biomeRoll < 0.7 ? 'wood' : biomeRoll < 0.9 ? 'stone' : 'iron';
+            break;
+          case BIOMES.PATH:
+            lootType = biomeRoll < 0.6 ? 'wood' : biomeRoll < 0.8 ? 'stone' : 'iron';
             break;
           case BIOMES.MOUNTAIN:
             lootType = biomeRoll < 0.4 ? 'stone' : biomeRoll < 0.7 ? 'iron' : biomeRoll < 0.9 ? 'gold' : 'gem';
@@ -969,33 +1186,67 @@
       }
     }
 
-    // Zoom functions
-    function zoomIn() {
-      if (ZOOM_LEVEL < MAX_ZOOM) {
-        ZOOM_LEVEL += ZOOM_STEP;
-        updateZoom();
-      }
-    }
-
-    function zoomOut() {
-      if (ZOOM_LEVEL > MIN_ZOOM) {
-        ZOOM_LEVEL -= ZOOM_STEP;
-        updateZoom();
-      }
-    }
-
-    function updateZoom() {
-      // Update tile size and view radius based on zoom
-      TILE_SIZE = 20 * ZOOM_LEVEL;
-      VIEW_RADIUS = Math.ceil(10 / ZOOM_LEVEL);
+    // Map functionality
+    function showMap() {
+      const mapOverlay = document.getElementById('map-overlay');
+      const mapTitle = document.getElementById('map-title');
+      const mapCanvas = document.getElementById('map-canvas');
+      const ctx = mapCanvas.getContext('2d');
       
-      // Update zoom level display
-      zoomLevelDisplay.textContent = `Zoom: ${ZOOM_LEVEL.toFixed(2)}x`;
+      // Update map title
+      mapTitle.textContent = `World Map - Level ${player.z}`;
       
-      // Re-render the world with new zoom settings
-      renderWorld();
+      // Set canvas size (smaller scale for performance)
+      const mapScale = 1; // 1 pixel per tile
+      mapCanvas.width = CUBE_SIZE * mapScale;
+      mapCanvas.height = CUBE_SIZE * mapScale;
+      
+      // Define colors for each terrain type
+      const terrainColors = {
+        'grass': '#32CD32',
+        'forest': '#006400',
+        'path': '#D2B48C',
+        'water': '#1E90FF',
+        'mountain': '#696969',
+        'desert': '#F4A460',
+        'snow': '#F0F8FF',
+        'lava': '#FF4500'
+      };
+      
+      // Generate and draw the entire map
+      for (let y = 0; y < CUBE_SIZE; y++) {
+        for (let x = 0; x < CUBE_SIZE; x++) {
+          const terrain = generateTerrain(x, y, player.z);
+          const color = terrainColors[terrain.biome.terrain] || '#222';
+          
+          ctx.fillStyle = color;
+          ctx.fillRect(x * mapScale, y * mapScale, mapScale, mapScale);
+          
+          // Draw stairs as bright green
+          if (isOnStairs(x, y, player.z)) {
+            ctx.fillStyle = '#00FF00';
+            ctx.fillRect(x * mapScale, y * mapScale, mapScale, mapScale);
+          }
+        }
+      }
+      
+      // Draw player position as a red dot
+      const playerSize = Math.max(3, mapScale * 2);
+      ctx.fillStyle = '#FF0000';
+      ctx.fillRect(
+        player.x * mapScale - playerSize/2, 
+        player.y * mapScale - playerSize/2, 
+        playerSize, 
+        playerSize
+      );
+      
+      // Show the map overlay
+      mapOverlay.style.display = 'block';
     }
-
+    
+    function hideMap() {
+      document.getElementById('map-overlay').style.display = 'none';
+    }
     // Initialize functions
     function getCurrentUserEmail() {
       const params = new URLSearchParams(window.location.search);
@@ -1033,10 +1284,10 @@
       user3: { x: 100, y: 600, z: 10 }
     };
 
-    // Stairs at (510, 500) on Z = 0 and Z = 10
+    // Stairs at the door near top right corner and on Z = 10
     const staircases = [
-      { x: 510, y: 500, z: 0 },
-      { x: 510, y: 500, z: 10 }
+      { x: 950, y: 50, z: 0 },  // Door near top right corner
+      { x: 950, y: 50, z: 10 } // Corresponding stairs on floor 10
     ];
 
     userDropdown.addEventListener('change', (e) => {
@@ -1118,6 +1369,20 @@
       const newY = player.y + dy;
       const newZ = player.z + dz;
 
+      // Check bounds
+      if (newX < 0 || newX >= CUBE_SIZE || newY < 0 || newY >= CUBE_SIZE) {
+        return; // Don't move outside bounds
+      }
+
+      // Check if destination is walkable (only on z=0 forest level)
+      if (player.z === 0 && dz === 0) {
+        const destinationTerrain = generateTerrain(newX, newY, player.z);
+        if (!destinationTerrain.biome.walkable) {
+          return; // Can't move into forest areas
+        }
+      }
+
+      // Update position if move is valid
       if (newX >= 0 && newX < CUBE_SIZE) player.x = newX;
       if (newY >= 0 && newY < CUBE_SIZE) player.y = newY;
 
@@ -1136,6 +1401,15 @@
 
     // Keyboard controls
     document.addEventListener('keydown', (e) => {
+      // Check if map is open first
+      if (document.getElementById('map-overlay').style.display === 'block') {
+        if (e.key === 'Escape') {
+          hideMap();
+        }
+        return; // Don't process other keys when map is open
+      }
+      
+      // Normal game controls
       switch (e.key) {
         case 'ArrowUp': move(0, -1); break;
         case 'ArrowDown': move(0, 1); break;
@@ -1143,9 +1417,8 @@
         case 'ArrowRight': move(1, 0); break;
         case 'w': move(0, 0, 10); break;
         case 's': move(0, 0, -10); break;
-        case 'z': zoomIn(); break;
-        case 'x': zoomOut(); break;
         case 'c': showCharacterSelector(); break;
+        case 'm': showMap(); break; // M key to open map
       }
     });
 
@@ -1181,16 +1454,6 @@
         move(0, 0, -10);
       });
 
-      document.getElementById('btn-zoom-in').addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        zoomIn();
-      });
-
-      document.getElementById('btn-zoom-out').addEventListener('touchstart', (e) => {
-        e.preventDefault();
-        zoomOut();
-      });
-
       // Click events for desktop
       document.getElementById('btn-up').addEventListener('click', () => move(0, -1));
       document.getElementById('btn-down').addEventListener('click', () => move(0, 1));
@@ -1198,8 +1461,6 @@
       document.getElementById('btn-right').addEventListener('click', () => move(1, 0));
       document.getElementById('btn-up-z').addEventListener('click', () => move(0, 0, 10));
       document.getElementById('btn-down-z').addEventListener('click', () => move(0, 0, -10));
-      document.getElementById('btn-zoom-in').addEventListener('click', () => zoomIn());
-      document.getElementById('btn-zoom-out').addEventListener('click', () => zoomOut());
     }
 
     // Initialize the game
@@ -1209,6 +1470,10 @@
     showCharacterSelector();
     updateInventory();
     renderWorld();
+    
+    // Map event listeners
+    document.getElementById('map-btn').addEventListener('click', showMap);
+    document.getElementById('map-close-btn').addEventListener('click', hideMap);
   </script>
 
 </body>

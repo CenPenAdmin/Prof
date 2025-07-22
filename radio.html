@@ -65,13 +65,26 @@
       font-size: 1.2rem;
       font-style: italic;
     }
+    #djInfo, #artistInfo {
+      margin: 10px 0;
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+    #djInfo {
+      color: #FFD700; /* Gold color for DJ */
+    }
+    #artistInfo {
+      color: #FF69B4; /* Pink color for artist */
+    }
   </style>
 </head>
 <body>
   <a id="backLink">← Back to Profile</a>
   <div id="radioContainer">
     <h1>🎵 Breeze Radio</h1>
-    <div id="nowPlaying">Now Playing: Welcome to Breeze Radio!</div>
+    <div id="nowPlaying">Ready to broadcast...</div>
+    <div id="djInfo">3.DJ <span id="currentDJ">DJ Breeze</span></div>
+    <div id="artistInfo">Current Content: <span id="currentArtist">Welcome Mix</span></div>
     
     <div style="margin: 30px 0;">
       <button class="radio-btn" id="playBtn" title="Play">▶</button>
@@ -83,18 +96,10 @@
       <label for="volumeSlider">Volume:</label><br>
       <input type="range" id="volumeSlider" min="0" max="100" value="50">
     </div>
-    
-    <div style="margin-top: 20px;">
-      <button class="radio-btn" id="prevBtn" title="Previous">⏮</button>
-      <button class="radio-btn" id="nextBtn" title="Next">⏭</button>
-    </div>
   </div>
 
-  <!-- Add audio element for streaming -->
-  <audio id="radioAudio" preload="none" crossorigin="anonymous">
-    <source src="http://ice1.somafm.com/groovesalad-256-mp3" type="audio/mpeg">
-    <source src="https://stream.rcast.net/70599" type="audio/mpeg">
-    <source src="http://streaming.live365.com/b39962_128mp3" type="audio/mpeg">
+  <!-- Audio element for your radio station -->
+  <audio id="radioAudio" preload="none">
     Your browser does not support the audio element.
   </audio>
 
@@ -110,45 +115,81 @@
     // Audio streaming functionality
     const audio = document.getElementById('radioAudio');
     let isPlaying = false;
+    let currentDJ = "";
+    let currentArtist = "";
+    let isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 
-    // Multiple radio stations
+    // Simple iOS compatibility without over-complication
+    if (isIOS) {
+      audio.setAttribute('playsinline', 'true');
+    }
+
+    // Function to get current show info
+    function parseAudioInfo() {
+      // Get current show information from the new show-based API
+      fetch(`${window.location.protocol}//${window.location.host}/api/current-show`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.show) {
+            currentDJ = data.show.dj.replace('%40', '@');
+            currentArtist = data.show.currentTrack.title;
+            
+            document.getElementById('currentDJ').innerText = currentDJ;
+            document.getElementById('currentArtist').innerText = currentArtist;
+            
+            // Update show title if available
+            if (data.show.title && data.show.title !== "Breeze Radio") {
+              document.querySelector('h1').innerText = `🎵 ${data.show.title}`;
+            }
+          }
+        })
+        .catch(error => {
+          console.log('Using default DJ/Artist info');
+          currentDJ = "g.drizzle@cap";
+          currentArtist = "audio";
+          document.getElementById('currentDJ').innerText = currentDJ;
+          document.getElementById('currentArtist').innerText = currentArtist;
+        });
+    }
+
+    function updateNowPlaying() {
+      if (isPlaying) {
+        document.getElementById("nowPlaying").innerText = `🎵 live on air - ${currentDJ}`;
+      }
+    }
+
+    // Initialize audio info
+    parseAudioInfo();
+
+    // Your own radio station only
     const stations = [
       {
-        name: "SomaFM Groove Salad",
-        url: "http://ice1.somafm.com/groovesalad-256-mp3"
-      },
-      {
-        name: "Chillhop Radio",
-        url: "https://stream.rcast.net/70599"
-      },
-      {
-        name: "Jazz Radio",
-        url: "http://streaming.live365.com/b39962_128mp3"
-      },
-      {
-        name: "LoFi Hip Hop",
-        url: "https://stream.zeno.fm/f3nwn9qqqkhvv"
+        name: "🎵 Breeze Radio - Your Station",
+        url: `${window.location.protocol}//${window.location.host}/stream`
       }
     ];
 
+    // Debug: Log the stream URL being used
+    console.log('Your radio stream URL:', stations[0].url);
+
     let currentStation = 0;
 
-    function loadStation(index) {
-      audio.src = stations[index].url;
-      document.getElementById("nowPlaying").innerText = `📻 ${stations[index].name}`;
+    function loadStation() {
+      audio.src = stations[0].url;
+      document.getElementById("nowPlaying").innerText = `📻 ${stations[0].name}`;
     }
 
-    // Initialize with first station
-    loadStation(0);
+    // Initialize your station
+    loadStation();
 
     document.getElementById("playBtn").onclick = () => {
       if (!isPlaying) {
         audio.play().then(() => {
           isPlaying = true;
-          document.getElementById("nowPlaying").innerText = `🎵 Playing: ${stations[currentStation].name}`;
+          document.getElementById("nowPlaying").innerText = `🎵 live on air - ${currentDJ}`;
         }).catch(error => {
           console.error('Error playing audio:', error);
-          document.getElementById("nowPlaying").innerText = "❌ Error loading stream";
+          document.getElementById("nowPlaying").innerText = "❌ Connection failed - Try again";
         });
       }
     };
@@ -157,7 +198,7 @@
       if (isPlaying) {
         audio.pause();
         isPlaying = false;
-        document.getElementById("nowPlaying").innerText = "⏸ Paused";
+        document.getElementById("nowPlaying").innerText = "⏸ Paused - Off Air";
       }
     };
 
@@ -165,29 +206,7 @@
       audio.pause();
       audio.currentTime = 0;
       isPlaying = false;
-      document.getElementById("nowPlaying").innerText = "⏹ Stopped";
-    };
-
-    document.getElementById("nextBtn").onclick = () => {
-      currentStation = (currentStation + 1) % stations.length;
-      loadStation(currentStation);
-      if (isPlaying) {
-        audio.play().catch(error => {
-          console.error('Error playing next station:', error);
-          document.getElementById("nowPlaying").innerText = "❌ Error loading stream";
-        });
-      }
-    };
-
-    document.getElementById("prevBtn").onclick = () => {
-      currentStation = (currentStation - 1 + stations.length) % stations.length;
-      loadStation(currentStation);
-      if (isPlaying) {
-        audio.play().catch(error => {
-          console.error('Error playing previous station:', error);
-          document.getElementById("nowPlaying").innerText = "❌ Error loading stream";
-        });
-      }
+      document.getElementById("nowPlaying").innerText = "⏹ Stopped - Off Air";
     };
 
     document.getElementById("volumeSlider").oninput = (e) => {
@@ -199,24 +218,24 @@
 
     // Handle audio events
     audio.addEventListener('loadstart', () => {
-      document.getElementById("nowPlaying").innerText = "📡 Connecting...";
+      document.getElementById("nowPlaying").innerText = "📡 Connecting to studio...";
     });
 
     audio.addEventListener('canplay', () => {
       if (isPlaying) {
-        document.getElementById("nowPlaying").innerText = `🎵 Playing: ${stations[currentStation].name}`;
+        document.getElementById("nowPlaying").innerText = `🎵 live on air - ${currentDJ}`;
       }
     });
 
     audio.addEventListener('error', (e) => {
       console.error('Audio error:', e);
-      document.getElementById("nowPlaying").innerText = "❌ Stream unavailable";
+      document.getElementById("nowPlaying").innerText = "❌ Studio connection lost";
       isPlaying = false;
     });
 
     audio.addEventListener('ended', () => {
       isPlaying = false;
-      document.getElementById("nowPlaying").innerText = "📻 Stream ended";
+      document.getElementById("nowPlaying").innerText = "📻 Broadcast ended";
     });
   </script>
 </body>

@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Music Library - Prof Radio</title>
+  <style>
+    body {
+      background: linear-gradient(135deg, #ff6699, #9933ff, #3399ff);
+      font-family: 'Trebuchet MS', sans-serif;
+      padding: 20px;
+      color: #fff;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    .back-link {
+      display: inline-block;
+      margin-bottom: 20px;
+      color: #fff;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+    .upload-section {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 30px;
+      margin-bottom: 30px;
+      text-align: center;
+    }
+    .file-input {
+      margin: 20px 0;
+    }
+    .file-input input[type="file"] {
+      display: none;
+    }
+    .file-input label {
+      display: inline-block;
+      padding: 12px 24px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 2px dashed rgba(255, 255, 255, 0.5);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .file-input label:hover {
+      background: rgba(255, 255, 255, 0.3);
+      border-color: rgba(255, 255, 255, 0.8);
+    }
+    .music-library {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(10px);
+      border-radius: 15px;
+      padding: 20px;
+    }
+    .music-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(255, 255, 255, 0.1);
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+    }
+    .music-info {
+      flex: 1;
+    }
+    .music-title {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .music-meta {
+      font-size: 0.9rem;
+      opacity: 0.8;
+    }
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      margin: 5px;
+      transition: all 0.3s ease;
+    }
+    .btn-primary {
+      background: rgba(255, 255, 255, 0.2);
+      color: #fff;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .btn-primary:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <a class="back-link" onclick="goBack()">← Back to Shows</a>
+    
+    <div class="header">
+      <h1>🎵 Music Library</h1>
+      <p>Upload and manage your music for radio shows</p>
+    </div>
+
+    <div class="upload-section">
+      <h3>Upload New Music</h3>
+      <div class="file-input">
+        <label for="audioFile">
+          📁 Choose Audio File (MP3, WAV, M4A)
+        </label>
+        <input type="file" id="audioFile" accept=".mp3,.wav,.m4a" onchange="handleFileSelect(event)">
+      </div>
+      
+      <div id="uploadInfo" style="margin-top: 20px; display: none;">
+        <input type="text" id="songTitle" placeholder="Song Title" style="margin: 5px; padding: 10px; border-radius: 5px; border: none;">
+        <input type="text" id="artistName" placeholder="Artist Name" style="margin: 5px; padding: 10px; border-radius: 5px; border: none;">
+        <br>
+        <button class="btn btn-primary" onclick="uploadFile()">Upload to Library</button>
+      </div>
+    </div>
+
+    <div class="music-library">
+      <h3>Your Music Library</h3>
+      <div id="musicList">
+        <p>Loading your music...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const userEmail = params.get("email");
+    let selectedFile = null;
+
+    function goBack() {
+      window.location.href = `shows.html?email=${encodeURIComponent(userEmail)}`;
+    }
+
+    function handleFileSelect(event) {
+      selectedFile = event.target.files[0];
+      if (selectedFile) {
+        document.getElementById('uploadInfo').style.display = 'block';
+        
+        // Try to extract title from filename
+        const fileName = selectedFile.name.replace(/\.[^/.]+$/, ""); // Remove extension
+        document.getElementById('songTitle').value = fileName;
+      }
+    }
+
+    function uploadFile() {
+      if (!selectedFile) {
+        alert('Please select a file first');
+        return;
+      }
+
+      const title = document.getElementById('songTitle').value;
+      const artist = document.getElementById('artistName').value;
+
+      if (!title) {
+        alert('Please enter a song title');
+        return;
+      }
+
+      // For now, just show success message
+      // In a full implementation, this would upload to the server
+      alert(`Music would be uploaded:\nTitle: ${title}\nArtist: ${artist || 'Unknown'}\nFile: ${selectedFile.name}`);
+      
+      // Reset form
+      document.getElementById('audioFile').value = '';
+      document.getElementById('uploadInfo').style.display = 'none';
+      selectedFile = null;
+      
+      // Reload music library
+      loadMusicLibrary();
+    }
+
+    function loadMusicLibrary() {
+      // For now, show existing files from the uploads directory
+      // In a full implementation, this would fetch from an API
+      document.getElementById('musicList').innerHTML = `
+        <div class="music-item">
+          <div class="music-info">
+            <div class="music-title">Chill Beat #1</div>
+            <div class="music-meta">G.Drizzle • 4:00 • audio.wav</div>
+          </div>
+          <div>
+            <button class="btn btn-primary" onclick="previewTrack('audio.wav')">▶️ Preview</button>
+            <button class="btn btn-primary" onclick="addToShow('audio.wav')">➕ Add to Show</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function previewTrack(fileName) {
+      alert(`Preview functionality coming soon for: ${fileName}`);
+    }
+
+    function addToShow(fileName) {
+      alert(`Add to show functionality coming soon for: ${fileName}`);
+    }
+
+    // Load music when page loads
+    loadMusicLibrary();
+  </script>
+</body>
+</html>

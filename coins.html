@@ -187,6 +187,68 @@
             background: rgba(0, 255, 0, 0.1);
         }
 
+        .trade-item {
+            background: rgba(0, 170, 255, 0.1);
+            border: 1px solid #00aaff;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+        }
+
+        .trade-item.incoming {
+            border-color: #ffcc00;
+            background: rgba(255, 204, 0, 0.1);
+        }
+
+        .trade-item.outgoing {
+            border-color: #ff6699;
+            background: rgba(255, 102, 153, 0.1);
+        }
+
+        .trade-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .trade-accept {
+            background: linear-gradient(45deg, #00ff00, #00aa00);
+            color: #000;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .trade-reject {
+            background: linear-gradient(45deg, #ff4444, #cc0000);
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .trade-cancel {
+            background: linear-gradient(45deg, #888, #666);
+            color: #fff;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .trading-section {
+            padding: 0;
+        }
+
         .send-form {
             display: flex;
             flex-direction: column;
@@ -545,19 +607,10 @@
             <div class="leaderboard">
                 <h4 style="color: #ffcc00; margin-bottom: 10px;">🏆 Top Miners</h4>
                 
-                <div class="leaderboard-item">
-                    <span>🥇 CryptoMaster</span>
-                    <span>127.45 PROF</span>
-                </div>
-                
-                <div class="leaderboard-item">
-                    <span>🥈 BlockChainer</span>
-                    <span>89.32 PROF</span>
-                </div>
-                
-                <div class="leaderboard-item">
-                    <span>🥉 HashHunter</span>
-                    <span>76.18 PROF</span>
+                <div id="topMinersLeaderboard">
+                    <div style="text-align: center; color: #888; padding: 10px;">
+                        Loading top miners...
+                    </div>
                 </div>
                 
                 <div class="leaderboard-item" id="userRanking" style="border-left-color: #00ff00;">
@@ -580,6 +633,7 @@
             <div class="wallet-tabs">
                 <button class="wallet-tab active" onclick="showWalletTab('overview')">Overview</button>
                 <button class="wallet-tab" onclick="showWalletTab('send')">Send</button>
+                <button class="wallet-tab" onclick="showWalletTab('trade')">Trade</button>
                 <button class="wallet-tab" onclick="showWalletTab('receive')">Receive</button>
                 <button class="wallet-tab" onclick="showWalletTab('history')">History</button>
             </div>
@@ -610,6 +664,46 @@
                     <textarea class="wallet-input" id="transactionNote" placeholder="Note (optional)" rows="2"></textarea>
                     <button type="submit" class="send-btn" id="sendBtn">💸 Send ProfCoin</button>
                 </form>
+            </div>
+
+            <div id="walletTrade" class="wallet-content">
+                <div class="trading-section">
+                    <h4 style="color: #00aaff; margin-bottom: 15px;">🔄 ProfCoin Trading</h4>
+                    
+                    <form class="send-form" id="tradeForm">
+                        <input type="email" class="wallet-input" id="tradeRecipient" placeholder="Recipient email" required>
+                        <input type="number" class="wallet-input" id="tradeAmount" placeholder="Amount (PROF)" step="0.00000001" min="0.00000001" required>
+                        <textarea class="wallet-input" id="tradeNote" placeholder="Trade note (optional)" rows="2"></textarea>
+                        <button type="submit" class="send-btn">🤝 Propose Trade</button>
+                    </form>
+
+                    <div style="margin-top: 20px;">
+                        <h5 style="color: #ffcc00; margin-bottom: 10px;">📨 Incoming Trade Requests</h5>
+                        <div id="incomingTrades">
+                            <div style="text-align: center; color: #888; padding: 10px;">
+                                No incoming trades
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <h5 style="color: #ff6699; margin-bottom: 10px;">📤 Outgoing Trade Requests</h5>
+                        <div id="outgoingTrades">
+                            <div style="text-align: center; color: #888; padding: 10px;">
+                                No outgoing trades
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 20px;">
+                        <h5 style="color: #00ff00; margin-bottom: 10px;">🌐 Active Community Trades</h5>
+                        <div id="communityTrades">
+                            <div style="text-align: center; color: #888; padding: 10px;">
+                                Loading trades...
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div id="walletReceive" class="wallet-content">
@@ -645,6 +739,11 @@
         let progressInterval = null;
         let hashRate = 0;
         let difficulty = 1024;
+        
+        // Cross-device mining sync
+        let sessionId = generateSessionId(); // Unique session ID for this device
+        let syncInterval = null; // For periodic sync with backend
+        let backendMiningState = null; // Store backend mining state
 
         // Wallet variables
         let walletAddress = '';
@@ -653,6 +752,11 @@
         let pendingBalance = 0;
         let totalReceived = 0;
         let totalSent = 0;
+
+        // Generate unique session ID for this device/browser
+        function generateSessionId() {
+            return `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        }
 
         // Initialize user session
         function initializeUser() {
@@ -727,11 +831,17 @@
                 totalSent = data.totalSent || 0;
             }
             
+            // Load from backend (overrides localStorage if available)
+            loadBalanceFromBackend();
+            
             // Generate or load wallet
             generateWallet();
             updateDisplay();
             updateWalletDisplay();
             updateTransactionHistory();
+            
+            // Load trades
+            loadUserTrades();
         }
 
         // Save user's mining data
@@ -749,6 +859,82 @@
                 lastSaved: new Date().toISOString()
             };
             localStorage.setItem(`profcoin_${userEmail}`, JSON.stringify(data));
+            
+            // Also save to backend
+            saveBalanceToBackend();
+        }
+
+        // Save balance to backend
+        async function saveBalanceToBackend() {
+            if (!currentUser?.email) return;
+
+            try {
+                const response = await fetch('/api/user/update-balance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: currentUser.email,
+                        balance: coinBalance,
+                        blocksMined: blocksMined,
+                        totalEarned: totalEarned,
+                        miningActive: miningActive,
+                        sessionId: sessionId
+                    })
+                });
+
+                if (response.ok) {
+                    console.log('Balance and mining state saved to backend successfully');
+                } else {
+                    console.error('Failed to save balance to backend');
+                }
+            } catch (error) {
+                console.error('Error saving balance to backend:', error);
+            }
+        }
+
+        // Load balance from backend
+        async function loadBalanceFromBackend() {
+            if (!currentUser?.email) return;
+
+            try {
+                const response = await fetch(`/api/user/${encodeURIComponent(currentUser.email)}/balance`);
+                if (response.ok) {
+                    const data = await response.json();
+                    coinBalance = data.balance || coinBalance;
+                    blocksMined = data.blocksMined || blocksMined;
+                    totalEarned = data.totalEarned || totalEarned;
+                    
+                    // Handle cross-device mining synchronization
+                    backendMiningState = {
+                        miningActive: data.miningActive || false,
+                        miningSessionId: data.miningSessionId,
+                        miningStartTime: data.miningStartTime
+                    };
+                    
+                    // If user is mining on another device, continue mining here
+                    if (backendMiningState.miningActive && !miningActive) {
+                        addToConsole('🔄 Detected mining session from another device - synchronizing...', 'info');
+                        
+                        // Calculate elapsed time since mining started
+                        if (backendMiningState.miningStartTime) {
+                            const startTime = new Date(backendMiningState.miningStartTime);
+                            const elapsed = Date.now() - startTime.getTime();
+                            miningStartTime = startTime.getTime();
+                            
+                            addToConsole(`⏰ Mining resumed - ${Math.floor(elapsed / 60000)} minutes elapsed`, 'success');
+                        }
+                        
+                        // Start mining on this device
+                        startCrossSyncMining();
+                    }
+                    
+                    updateDisplay();
+                    updateWalletDisplay();
+                    console.log('Balance and mining state loaded from backend successfully');
+                }
+            } catch (error) {
+                console.error('Error loading balance from backend:', error);
+            }
         }
 
         // Update all displays
@@ -997,65 +1183,49 @@
             
             addToConsole('🚀 Mining started! Searching for valid blocks...', 'success');
             addToConsole(`Current difficulty: ${difficulty}`, 'info');
+            addToConsole(`📱 Session ID: ${sessionId.substring(0, 12)}...`, 'info');
             
-            let attempts = 0;
-            let progress = 0;
+            // Start mining intervals
+            startMiningIntervals();
             
-            miningInterval = setInterval(() => {
-                attempts++;
-                hashRate = Math.floor(attempts / ((Date.now() - miningStartTime) / 1000));
-                
-                const hash = generateHash();
-                document.getElementById('currentHash').textContent = `Current Hash: ${hash}`;
-                
-                progress = (progress + Math.random() * 10) % 100;
-                document.getElementById('miningProgress').style.width = progress + '%';
-                
-                if (Math.random() < 0.02) { // 2% chance to find a block
-                    const reward = 0.01 + (Math.random() * 0.005); // 0.01-0.015 PROF reward
-                    coinBalance += reward;
-                    totalEarned += reward;
-                    blocksMined++;
-                    
-                    // Add mining transaction to history
-                    addTransaction('mined', reward, 'Mining Network', `Block #${blocksMined} mined`);
-                    
-                    addToConsole(`⛏️ Block mined! Hash: ${hash.substring(0, 16)}...`, 'success');
-                    addToConsole(`💰 Reward: ${reward.toFixed(8)} PROF`, 'success');
-                    
-                    // Create floating coin animation
-                    createFloatingCoin(
-                        Math.random() * window.innerWidth,
-                        Math.random() * window.innerHeight
-                    );
-                    
-                    // Increase difficulty slightly
-                    difficulty = Math.floor(difficulty * 1.001);
-                    document.getElementById('networkDifficulty').textContent = difficulty;
-                    
-                    progress = 0;
-                    document.getElementById('miningProgress').style.width = '0%';
-                    
-                    updateDisplay();
-                    updateWalletDisplay();
-                    saveUserMiningData();
-                }
-                
-                updateDisplay();
-            }, 100);
+            // Start cross-device synchronization
+            startCrossDeviceSync();
             
-            // Update mining time
-            progressInterval = setInterval(() => {
-                if (miningStartTime) {
-                    const elapsed = Date.now() - miningStartTime;
-                    const hours = Math.floor(elapsed / 3600000);
-                    const minutes = Math.floor((elapsed % 3600000) / 60000);
-                    const seconds = Math.floor((elapsed % 60000) / 1000);
-                    
-                    document.getElementById('miningTime').textContent = 
-                        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-                }
-            }, 1000);
+            // Save initial mining state to backend
+            saveBalanceToBackend();
+        }
+
+        // Block found function (extracted from mining interval)
+        function blockFound() {
+            const reward = 0.01 + (Math.random() * 0.005); // 0.01-0.015 PROF reward
+            coinBalance += reward;
+            totalEarned += reward;
+            blocksMined++;
+            
+            const hash = generateHash();
+            
+            // Add mining transaction to history
+            addTransaction('mined', reward, 'Mining Network', `Block #${blocksMined} mined`);
+            
+            addToConsole(`⛏️ Block mined! Hash: ${hash.substring(0, 16)}...`, 'success');
+            addToConsole(`💰 Reward: ${reward.toFixed(8)} PROF`, 'success');
+            
+            // Create floating coin animation
+            createFloatingCoin(
+                Math.random() * window.innerWidth,
+                Math.random() * window.innerHeight
+            );
+            
+            // Increase difficulty slightly
+            difficulty = Math.floor(difficulty * 1.001);
+            document.getElementById('networkDifficulty').textContent = difficulty;
+            
+            updateDisplay();
+            updateWalletDisplay();
+            saveUserMiningData();
+            
+            // Refresh leaderboard after mining
+            setTimeout(() => loadTopMiners(), 1000);
         }
 
         // Stop mining process
@@ -1077,6 +1247,12 @@
                 progressInterval = null;
             }
             
+            // Stop cross-device sync
+            if (syncInterval) {
+                clearInterval(syncInterval);
+                syncInterval = null;
+            }
+            
             addToConsole('⏹️ Mining stopped.', 'error');
             addToConsole(`Total session earnings: ${((totalEarned) - parseFloat(localStorage.getItem(`profcoin_${currentUser?.email || 'unknown'}_session`) || 0)).toFixed(8)} PROF`, 'info');
             
@@ -1085,10 +1261,329 @@
             saveUserMiningData();
         }
 
+        // Start mining when syncing from another device
+        function startCrossSyncMining() {
+            if (miningActive) return; // Already mining on this device
+            
+            miningActive = true;
+            document.getElementById('mineBtn').disabled = true;
+            document.getElementById('stopBtn').disabled = false;
+            document.getElementById('pickaxe').style.display = 'block';
+            
+            addToConsole('🔄 Cross-device mining synchronized!', 'success');
+            addToConsole('⛏️ Mining resumed on this device...', 'info');
+            
+            // Start mining intervals
+            startMiningIntervals();
+            
+            // Start periodic sync with backend
+            startCrossDeviceSync();
+        }
+
+        // Start mining intervals (separated for reuse)
+        function startMiningIntervals() {
+            let attempts = 0;
+            let progress = 0;
+            
+            // Mining simulation interval
+            miningInterval = setInterval(() => {
+                attempts++;
+                hashRate = Math.floor(attempts / ((Date.now() - miningStartTime) / 1000));
+                
+                const hash = generateHash();
+                document.getElementById('currentHash').textContent = `Current Hash: ${hash}`;
+                
+                progress = (progress + Math.random() * 10) % 100;
+                document.getElementById('miningProgress').style.width = progress + '%';
+                
+                // Chance to find a block (every 10-30 seconds approximately)
+                if (Math.random() < 0.02) { // 2% chance per 100ms = block every ~5 seconds
+                    blockFound();
+                    progress = 0;
+                    document.getElementById('miningProgress').style.width = '0%';
+                }
+                
+                updateDisplay();
+            }, 100);
+            
+            // Progress tracking interval
+            progressInterval = setInterval(() => {
+                if (miningStartTime) {
+                    const elapsed = Date.now() - miningStartTime;
+                    const hours = Math.floor(elapsed / 3600000);
+                    const minutes = Math.floor((elapsed % 3600000) / 60000);
+                    const seconds = Math.floor((elapsed % 60000) / 1000);
+                    
+                    document.getElementById('miningTime').textContent = 
+                        `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                }
+            }, 1000);
+        }
+
+        // Start cross-device synchronization
+        function startCrossDeviceSync() {
+            // Sync with backend every 15 seconds
+            syncInterval = setInterval(async () => {
+                await syncMiningStateWithBackend();
+            }, 15000);
+        }
+
+        // Sync mining state with backend
+        async function syncMiningStateWithBackend() {
+            if (!currentUser?.email || !miningActive) return;
+
+            try {
+                const response = await fetch(`/api/user/${encodeURIComponent(currentUser.email)}/balance`);
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Update balance and stats from backend (in case another device mined)
+                    coinBalance = data.balance || coinBalance;
+                    blocksMined = data.blocksMined || blocksMined;
+                    totalEarned = data.totalEarned || totalEarned;
+                    
+                    // Check if mining was stopped on another device
+                    if (!data.miningActive && miningActive) {
+                        addToConsole('⚠️ Mining stopped on another device - stopping here too', 'warn');
+                        stopMining();
+                        return;
+                    }
+                    
+                    updateDisplay();
+                    updateWalletDisplay();
+                }
+            } catch (error) {
+                console.error('Error syncing mining state:', error);
+            }
+        }
+
         // Event listeners
         document.getElementById('mineBtn').addEventListener('click', startMining);
         document.getElementById('stopBtn').addEventListener('click', stopMining);
         document.getElementById('sendForm').addEventListener('submit', handleSendTransaction);
+        document.getElementById('tradeForm').addEventListener('submit', handleTradeProposal);
+
+        // Trading Functions
+
+        // Handle trade proposal submission
+        async function handleTradeProposal(event) {
+            event.preventDefault();
+            
+            const recipientEmail = document.getElementById('tradeRecipient').value;
+            const amount = parseFloat(document.getElementById('tradeAmount').value);
+            const note = document.getElementById('tradeNote').value;
+            
+            // Validation
+            if (!recipientEmail || !recipientEmail.includes('@')) {
+                addToConsole('❌ Invalid recipient email', 'error');
+                return;
+            }
+            
+            if (amount <= 0 || amount > coinBalance) {
+                addToConsole('❌ Invalid amount or insufficient balance', 'error');
+                return;
+            }
+            
+            if (recipientEmail === currentUser?.email) {
+                addToConsole('❌ Cannot trade with yourself', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/trade', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        sender: currentUser.email,
+                        recipient: recipientEmail,
+                        amount: amount,
+                        note: note
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    addToConsole(`🤝 Trade proposed: ${amount.toFixed(8)} PROF to ${recipientEmail}`, 'success');
+                    document.getElementById('tradeForm').reset();
+                    loadUserTrades(); // Refresh trades display
+                } else {
+                    addToConsole(`❌ Trade failed: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                addToConsole('❌ Error proposing trade', 'error');
+                console.error('Trade proposal error:', error);
+            }
+        }
+
+        // Load user trades
+        async function loadUserTrades() {
+            if (!currentUser?.email) return;
+
+            try {
+                const response = await fetch(`/api/trades/${encodeURIComponent(currentUser.email)}`);
+                if (response.ok) {
+                    const trades = await response.json();
+                    displayTrades(trades);
+                }
+            } catch (error) {
+                console.error('Error loading trades:', error);
+            }
+        }
+
+        // Display trades in the UI
+        function displayTrades(trades) {
+            const incomingDiv = document.getElementById('incomingTrades');
+            const outgoingDiv = document.getElementById('outgoingTrades');
+            
+            const incomingTrades = trades.filter(trade => 
+                trade.recipient === currentUser.email && trade.status === 'pending'
+            );
+            const outgoingTrades = trades.filter(trade => 
+                trade.sender === currentUser.email && trade.status === 'pending'
+            );
+
+            // Display incoming trades
+            if (incomingTrades.length === 0) {
+                incomingDiv.innerHTML = '<div style="text-align: center; color: #888; padding: 10px;">No incoming trades</div>';
+            } else {
+                incomingDiv.innerHTML = incomingTrades.map(trade => `
+                    <div class="trade-item incoming">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <div style="font-weight: bold; color: #ffcc00;">From: ${trade.sender}</div>
+                            <div style="font-weight: bold; color: #00ff00;">${trade.amount.toFixed(8)} PROF</div>
+                        </div>
+                        <div style="font-size: 0.8rem; color: #ccc; margin-bottom: 8px;">
+                            ${new Date(trade.createdAt).toLocaleString()}
+                        </div>
+                        ${trade.note ? `<div style="font-size: 0.9rem; margin-bottom: 8px;">"${trade.note}"</div>` : ''}
+                        <div class="trade-actions">
+                            <button class="trade-accept" onclick="respondToTrade('${trade.id}', 'accepted')">✅ Accept</button>
+                            <button class="trade-reject" onclick="respondToTrade('${trade.id}', 'rejected')">❌ Reject</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Display outgoing trades
+            if (outgoingTrades.length === 0) {
+                outgoingDiv.innerHTML = '<div style="text-align: center; color: #888; padding: 10px;">No outgoing trades</div>';
+            } else {
+                outgoingDiv.innerHTML = outgoingTrades.map(trade => `
+                    <div class="trade-item outgoing">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <div style="font-weight: bold; color: #ff6699;">To: ${trade.recipient}</div>
+                            <div style="font-weight: bold; color: #ff6699;">${trade.amount.toFixed(8)} PROF</div>
+                        </div>
+                        <div style="font-size: 0.8rem; color: #ccc; margin-bottom: 8px;">
+                            ${new Date(trade.createdAt).toLocaleString()}
+                        </div>
+                        ${trade.note ? `<div style="font-size: 0.9rem; margin-bottom: 8px;">"${trade.note}"</div>` : ''}
+                        <div class="trade-actions">
+                            <button class="trade-cancel" onclick="cancelTrade('${trade.id}')">🗑️ Cancel Trade</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // Respond to a trade (accept/reject)
+        async function respondToTrade(tradeId, status) {
+            try {
+                const response = await fetch('/api/trade/update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tradeId: tradeId,
+                        status: status,
+                        userEmail: currentUser.email
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    if (status === 'accepted') {
+                        addToConsole(`✅ Trade accepted! Received ${result.trade.amount.toFixed(8)} PROF`, 'success');
+                        // Reload balance from backend
+                        loadBalanceFromBackend();
+                    } else {
+                        addToConsole(`❌ Trade rejected`, 'info');
+                    }
+                    loadUserTrades(); // Refresh trades display
+                } else {
+                    addToConsole(`❌ Error: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                addToConsole('❌ Error responding to trade', 'error');
+                console.error('Trade response error:', error);
+            }
+        }
+
+        // Cancel a trade
+        async function cancelTrade(tradeId) {
+            try {
+                const response = await fetch(`/api/trade/${tradeId}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        userEmail: currentUser.email
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    addToConsole('🗑️ Trade cancelled', 'info');
+                    loadUserTrades(); // Refresh trades display
+                } else {
+                    addToConsole(`❌ Error: ${result.error}`, 'error');
+                }
+            } catch (error) {
+                addToConsole('❌ Error cancelling trade', 'error');
+                console.error('Trade cancellation error:', error);
+            }
+        }
+
+        // Load community trades
+        async function loadCommunityTrades() {
+            try {
+                const response = await fetch('/api/trades');
+                if (response.ok) {
+                    const trades = await response.json();
+                    displayCommunityTrades(trades);
+                }
+            } catch (error) {
+                console.error('Error loading community trades:', error);
+            }
+        }
+
+        // Display community trades
+        function displayCommunityTrades(trades) {
+            const communityDiv = document.getElementById('communityTrades');
+            
+            // Filter out user's own trades
+            const publicTrades = trades.filter(trade => 
+                trade.sender !== currentUser?.email && trade.recipient !== currentUser?.email
+            );
+
+            if (publicTrades.length === 0) {
+                communityDiv.innerHTML = '<div style="text-align: center; color: #888; padding: 10px;">No active community trades</div>';
+            } else {
+                communityDiv.innerHTML = publicTrades.slice(0, 5).map(trade => `
+                    <div class="trade-item">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                            <div style="font-weight: bold; color: #00ff00;">${trade.sender.split('@')[0]}... → ${trade.recipient.split('@')[0]}...</div>
+                            <div style="font-weight: bold; color: #ffcc00;">${trade.amount.toFixed(8)} PROF</div>
+                        </div>
+                        <div style="font-size: 0.8rem; color: #ccc;">
+                            ${new Date(trade.createdAt).toLocaleString()}
+                        </div>
+                        ${trade.note ? `<div style="font-size: 0.9rem; margin-top: 5px; color: #aaa;">"${trade.note}"</div>` : ''}
+                    </div>
+                `).join('');
+            }
+        }
 
         // Auto-save every 30 seconds
         setInterval(() => {
@@ -1096,6 +1591,15 @@
                 saveUserMiningData();
             }
         }, 30000);
+
+        // Refresh trades every 60 seconds
+        setInterval(() => {
+            if (currentUser?.email) {
+                loadUserTrades();
+                loadCommunityTrades();
+                loadTopMiners(); // Refresh leaderboard
+            }
+        }, 60000);
 
         // Simulate network activity
         setInterval(() => {
@@ -1111,10 +1615,101 @@
         // Initialize the application
         initializeUser();
 
+        // Load community trades on page load
+        setTimeout(() => {
+            if (currentUser?.email) {
+                loadCommunityTrades();
+                loadTopMiners();
+            }
+        }, 2000);
+
+        // Load top miners from backend
+        async function loadTopMiners() {
+            try {
+                const response = await fetch('/api/top-miners');
+                if (response.ok) {
+                    const data = await response.json();
+                    displayTopMiners(data.miners);
+                }
+            } catch (error) {
+                console.error('Error loading top miners:', error);
+                document.getElementById('topMinersLeaderboard').innerHTML = 
+                    '<div style="text-align: center; color: #ff4444; padding: 10px;">Error loading miners</div>';
+            }
+        }
+
+        // Display top miners in leaderboard
+        function displayTopMiners(miners) {
+            const leaderboardDiv = document.getElementById('topMinersLeaderboard');
+            
+            if (miners.length === 0) {
+                leaderboardDiv.innerHTML = '<div style="text-align: center; color: #888; padding: 10px;">No miners yet - start mining to be the first!</div>';
+                return;
+            }
+
+            const medals = ['🥇', '🥈', '🥉'];
+            
+            leaderboardDiv.innerHTML = miners.map((miner, index) => {
+                const medal = index < 3 ? medals[index] : `#${index + 1}`;
+                const displayName = miner.name.length > 15 ? miner.name.substring(0, 15) + '...' : miner.name;
+                
+                return `
+                    <div class="leaderboard-item">
+                        <span>${medal} ${displayName}</span>
+                        <span>${miner.balance.toFixed(2)} PROF</span>
+                    </div>
+                `;
+            }).join('');
+
+            // Update user's ranking
+            if (currentUser?.email) {
+                const userRank = miners.findIndex(miner => miner.email === currentUser.email);
+                const userRankingDiv = document.getElementById('userRanking');
+                
+                if (userRank !== -1) {
+                    userRankingDiv.innerHTML = `
+                        <span>👤 You (Rank #${userRank + 1})</span>
+                        <span>${miners[userRank].balance.toFixed(2)} PROF</span>
+                    `;
+                } else {
+                    userRankingDiv.innerHTML = `
+                        <span>👤 You (Not ranked)</span>
+                        <span>${coinBalance.toFixed(2)} PROF</span>
+                    `;
+                }
+            }
+        }
+
         // Cleanup on page unload
         window.addEventListener('beforeunload', () => {
             if (miningActive) {
+                // Mark mining as inactive on backend but don't save session end
+                // This allows other devices to continue mining
+                fetch('/api/user/update-balance', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: currentUser?.email,
+                        balance: coinBalance,
+                        blocksMined: blocksMined,
+                        totalEarned: totalEarned,
+                        miningActive: true, // Keep mining active for other devices
+                        sessionId: sessionId
+                    })
+                });
                 saveUserMiningData();
+            }
+        });
+
+        // Add page visibility change handler to pause/resume mining
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && miningActive) {
+                // Page is hidden but keep mining active on backend for other devices
+                console.log('Page hidden - continuing mining in background');
+            } else if (!document.hidden && miningActive) {
+                // Page is visible again - sync with backend
+                console.log('Page visible - syncing with backend');
+                syncMiningStateWithBackend();
             }
         });
     </script>

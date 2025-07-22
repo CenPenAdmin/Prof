@@ -5,5 +5,12 @@
     "latitude": 40.63579935540962,
     "longitude": -77.58025138079712
   },
-  "imageUrl": "/uploads/g.drizzle%40cap/profile.jpg"
+  "imageUrl": "/uploads/g.drizzle%40cap/profile.jpg",
+  "profcoinBalance": 2.0667159323569653,
+  "blocksMined": 175,
+  "totalEarned": 2.166715932356964,
+  "lastMiningUpdate": "2025-07-22T00:53:59.561Z",
+  "miningActive": true,
+  "miningSessionId": "session_1753145519611_s96vxnul0",
+  "miningStartTime": "2025-07-20T01:00:00.000Z"
 }

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API Test</title>
+</head>
+<body>
+    <h1>Shows API Test</h1>
+    <button onclick="testAPI()">Test Shows API</button>
+    <div id="result"></div>
+    
+    <script>
+        function testAPI() {
+            const email = 'g.drizzle@cap';
+            const apiUrl = `https://localhost:443/api/shows?owner=${encodeURIComponent(email)}`;
+            
+            console.log('Testing:', apiUrl);
+            document.getElementById('result').innerHTML = 'Testing...';
+            
+            fetch(apiUrl)
+                .then(response => {
+                    console.log('Status:', response.status);
+                    return response.json();
+                })
+                .then(data => {
+                    console.log('Data:', data);
+                    document.getElementById('result').innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('result').innerHTML = 'Error: ' + error.message;
+                });
+        }
+    </script>
+</body>
+</html>

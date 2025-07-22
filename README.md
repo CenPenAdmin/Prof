@@ -58,7 +58,6 @@ Prof/
 ├── game.html          # Grid game
 ├── radio.html         # Music streaming
 ├── messenger.html     # Chat interface
-├── file.html          # File sharing workspace
 ├── coins.html         # ProfCoin mining & wallet
 ├── server.js          # Express.js backend
 ├── package.json       # Dependencies

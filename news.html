@@ -349,33 +349,7 @@
             opacity: 0.9;
         }
 
-        .feed-filters {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
 
-        .filter-btn {
-            background: #ecf0f1;
-            border: none;
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s ease;
-            color: #7f8c8d;
-        }
-
-        .filter-btn.active {
-            background: #3498db;
-            color: white;
-        }
-
-        .filter-btn:hover {
-            background: #3498db;
-            color: white;
-        }
 
         .article-actions {
             display: flex;
@@ -538,37 +512,7 @@
             transform: translateY(-2px);
         }
 
-        .trending-topics {
-            list-style: none;
-        }
 
-        .trending-topic {
-            padding: 10px;
-            margin-bottom: 8px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .trending-topic:hover {
-            background: #3498db;
-            color: white;
-            transform: translateX(5px);
-        }
-
-        .weather-widget {
-            text-align: center;
-            background: linear-gradient(135deg, #74b9ff, #0984e3);
-            color: white;
-            border-radius: 15px;
-        }
-
-        .weather-temp {
-            font-size: 2rem;
-            font-weight: bold;
-            margin: 10px 0;
-        }
 
         .breaking-news {
             background: #e74c3c;
@@ -672,16 +616,7 @@
                 </form>
             </div>
 
-            <!-- Feed Filters -->
-            <div class="feed-filters">
-                <button class="filter-btn active" onclick="filterFeed('all')">All Stories</button>
-                <button class="filter-btn" onclick="filterFeed('local')">Local</button>
-                <button class="filter-btn" onclick="filterFeed('business')">Business</button>
-                <button class="filter-btn" onclick="filterFeed('community')">Community</button>
-                <button class="filter-btn" onclick="filterFeed('government')">Government</button>
-                <button class="filter-btn" onclick="filterFeed('recent')">Most Recent</button>
-                <button class="filter-btn" onclick="filterFeed('popular')">Most Popular</button>
-            </div>
+
 
             <!-- Top Story Banner -->
             <div class="top-story-banner" id="topStoryBanner">
@@ -721,30 +656,7 @@
                 </div>
             </div>
 
-            <div class="sidebar-widget weather-widget">
-                <h3 class="widget-title" style="color: white; border-bottom-color: rgba(255,255,255,0.3);">🌤️ Local Weather</h3>
-                <div class="weather-temp">72°F</div>
-                <div>Partly Cloudy</div>
-                <div style="font-size: 0.9rem; margin-top: 10px;">Perfect day for local reporting!</div>
-            </div>
 
-            <div class="sidebar-widget">
-                <h3 class="widget-title"> Trending Topics</h3>
-                <ul class="trending-topics" id="trendingTopics">
-                    <li class="trending-topic">#CommunityFirst</li>
-                    <li class="trending-topic">#LocalNews</li>
-                    <li class="trending-topic">#IndependentMedia</li>
-                </ul>
-            </div>
-
-            <div class="sidebar-widget">
-                <h3 class="widget-title">🏆 Top Contributors</h3>
-                <div id="topContributors">
-                    <div style="text-align: center; color: #7f8c8d; padding: 20px;">
-                        Start sharing stories to see top contributors!
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -755,7 +667,6 @@
         let currentUser = null;
         let stories = [];
         let comments = new Map();
-        let currentFilter = 'all';
         let socket = null;
 
         // Initialize Socket.IO connection for real-time updates
@@ -787,8 +698,6 @@
                 // Update display
                 updateFeedDisplay();
                 updateStatistics();
-                updateTrendingTopics();
-                updateTopContributors();
                 
                 // Show notification
                 showNotification(`📰 New story: "${story.title}" by ${story.author}`);
@@ -981,8 +890,6 @@
                 // Update feed display
                 updateFeedDisplay();
                 updateStatistics();
-                updateTrendingTopics();
-                updateTopContributors();
                 
             } catch (error) {
                 console.error('Error loading feed data:', error);
@@ -1004,8 +911,6 @@
 
                 updateFeedDisplay();
                 updateStatistics();
-                updateTrendingTopics();
-                updateTopContributors();
             }
         }
 
@@ -1139,8 +1044,6 @@
                     // Update display
                     updateFeedDisplay();
                     updateStatistics();
-                    updateTrendingTopics();
-                    updateTopContributors();
 
                     // Show success message
                     showNotification('Story shared successfully! 📰');
@@ -1157,8 +1060,6 @@
                     // Update display
                     updateFeedDisplay();
                     updateStatistics();
-                    updateTrendingTopics();
-                    updateTopContributors();
                     
                     // Show warning message
                     showNotification('Story saved locally - will sync when server is available', 'warning');
@@ -1178,8 +1079,6 @@
                     // Update display
                     updateFeedDisplay();
                     updateStatistics();
-                    updateTrendingTopics();
-                    updateTopContributors();
                     
                     showNotification('Story saved locally - server connection failed', 'warning');
                 } catch (localError) {
@@ -1205,17 +1104,17 @@
 
             emptyFeed.style.display = 'none';
 
-            // Filter stories based on current filter
-            let filteredStories = filterStories(stories, currentFilter);
+            // Sort stories by engagement score
+            let sortedStories = [...stories].sort((a, b) => b.engagementScore - a.engagementScore);
 
             // Determine top story
-            const topStory = getTopStory(filteredStories);
+            const topStory = getTopStory(sortedStories);
 
             // Clear existing content
             feedContainer.innerHTML = '';
 
             // Display stories
-            filteredStories.forEach((story, index) => {
+            sortedStories.forEach((story, index) => {
                 const isTopStory = topStory && story.id === topStory.id && index === 0;
                 const storyElement = createStoryElement(story, isTopStory);
                 feedContainer.appendChild(storyElement);
@@ -1223,7 +1122,7 @@
 
             // Show/hide top story banner
             const banner = document.getElementById('topStoryBanner');
-            if (topStory && filteredStories.length > 1) {
+            if (topStory && sortedStories.length > 1) {
                 document.getElementById('topStoryText').textContent = 
                     `"${topStory.title}" - Most engaged story`;
                 banner.classList.add('show');
@@ -1232,28 +1131,7 @@
             }
         }
 
-        // Filter stories based on criteria
-        function filterStories(storiesArray, filter) {
-            let filtered = [...storiesArray];
 
-            switch (filter) {
-                case 'recent':
-                    filtered.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                    break;
-                case 'popular':
-                    filtered.sort((a, b) => b.engagementScore - a.engagementScore);
-                    break;
-                case 'all':
-                    filtered.sort((a, b) => b.engagementScore - a.engagementScore);
-                    break;
-                default:
-                    // Filter by category
-                    filtered = filtered.filter(story => story.category === filter);
-                    filtered.sort((a, b) => b.engagementScore - a.engagementScore);
-            }
-
-            return filtered;
-        }
 
         // Get top story based on engagement
         function getTopStory(storiesArray) {
@@ -1495,19 +1373,7 @@
             }
         }
 
-        // Filter feed
-        function filterFeed(filter) {
-            currentFilter = filter;
-            
-            // Update active filter button
-            document.querySelectorAll('.filter-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
 
-            // Update feed display
-            updateFeedDisplay();
-        }
 
         // Update statistics
         function updateStatistics() {
@@ -1524,84 +1390,11 @@
             document.getElementById('todayStoriesCount').textContent = todayStories;
         }
 
-        // Update trending topics
-        function updateTrendingTopics() {
-            const topicsContainer = document.getElementById('trendingTopics');
-            
-            // Extract topics from stories
-            const topicCounts = {};
-            stories.forEach(story => {
-                const category = '#' + story.category.charAt(0).toUpperCase() + story.category.slice(1);
-                topicCounts[category] = (topicCounts[category] || 0) + 1;
-                
-                // Extract hashtags from content
-                const hashtags = story.content.match(/#\w+/g) || [];
-                hashtags.forEach(tag => {
-                    topicCounts[tag] = (topicCounts[tag] || 0) + 1;
-                });
-            });
 
-            // Sort by count and take top 5
-            const topTopics = Object.entries(topicCounts)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 5)
-                .map(([topic]) => topic);
 
-            // Add default topics if not enough
-            const defaultTopics = ['#CommunityFirst', '#LocalNews', '#IndependentMedia'];
-            const finalTopics = [...new Set([...topTopics, ...defaultTopics])].slice(0, 5);
 
-            topicsContainer.innerHTML = finalTopics.map(topic => 
-                `<li class="trending-topic" onclick="searchTopic('${topic}')">${topic}</li>`
-            ).join('');
-        }
 
-        // Update top contributors
-        function updateTopContributors() {
-            const contributorsContainer = document.getElementById('topContributors');
-            
-            if (stories.length === 0) {
-                contributorsContainer.innerHTML = '<div style="text-align: center; color: #7f8c8d; padding: 20px;">Start sharing stories to see top contributors!</div>';
-                return;
-            }
 
-            // Count stories per author
-            const contributorStats = {};
-            stories.forEach(story => {
-                const author = story.author;
-                if (!contributorStats[author]) {
-                    contributorStats[author] = {
-                        name: author,
-                        stories: 0,
-                        totalLikes: 0,
-                        totalComments: 0
-                    };
-                }
-                contributorStats[author].stories++;
-                contributorStats[author].totalLikes += story.likes;
-                contributorStats[author].totalComments += story.commentCount;
-            });
-
-            // Sort by engagement
-            const topContributors = Object.values(contributorStats)
-                .sort((a, b) => (b.totalLikes + b.totalComments) - (a.totalLikes + a.totalComments))
-                .slice(0, 3);
-
-            contributorsContainer.innerHTML = topContributors.map((contributor, index) => {
-                const medals = ['🥇', '🥈', '🥉'];
-                return `
-                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 8px; margin-bottom: 5px; background: #f8f9fa; border-radius: 5px;">
-                        <span>${medals[index]} ${contributor.name}</span>
-                        <span style="font-size: 0.8rem; color: #7f8c8d;">${contributor.stories} stories</span>
-                    </div>
-                `;
-            }).join('');
-        }
-
-        // Search topic
-        function searchTopic(topic) {
-            showNotification(`Searching for ${topic}... (Feature coming soon!)`);
-        }
 
         // Get time ago string
         function getTimeAgo(timestamp) {

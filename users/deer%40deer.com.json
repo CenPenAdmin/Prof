@@ -1,9 +1,11 @@
 {
-  "name": "deer",
+  "name": "Deer",
   "email": "deer@deer.com",
-  "location": {
-    "latitude": 40.600277,
-    "longitude": -77.414146
-  },
-  "imageUrl": "/uploads/deer%40deer.com/profile.jpg"
+  "profcoinBalance": 6.934633576599787,
+  "blocksMined": 635,
+  "totalEarned": 7.934633576599787,
+  "lastMiningUpdate": "2025-07-22T17:07:17.663Z",
+  "miningActive": true,
+  "miningSessionId": "session_1753204035217_80f9mjs71",
+  "miningStartTime": "2025-07-22T17:03:08.608Z"
 }

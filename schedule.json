@@ -1,0 +1,159 @@
+{
+  "currentSlot": 0,
+  "slotDuration": 3600,
+  "schedule": [
+    {
+      "slot": 0,
+      "time": "00:00",
+      "showId": "show_1753153187609",
+      "status": "scheduled",
+      "title": "hsheue",
+      "dj": "g.drizzle@cap"
+    },
+    {
+      "slot": 1,
+      "time": "01:00",
+      "showId": null,
+      "status": "available"
+    },
+    {
+      "slot": 2,
+      "time": "02:00",
+      "showId": null,
+      "status": "available"
+    },
+    {
+      "slot": 3,
+      "time": "03:00",
+      "showId": null,
+      "status": "available"
+    },
+    {
+      "slot": 4,
+      "time": "04:00",
+      "showId": null,
+      "status": "available"
+    },
+    {
+      "slot": 5,
+      "time": "05:00",
+      "showId": null,
+      "status": "available"
+    },
+    {
+      "slot": 6,
+      "time": "06:00",
+      "showId": null,
+      "status": "available"
+    },
+    {
+      "slot": 7,
+      "time": "07:00",
+      "showId": null,
+      "status": "available"
+    },
+    {
+      "slot": 8,
+      "time": "08:00",
+      "showId": null,
+      "status": "available"
+    },
+    {
+      "slot": 9,
+      "time": "09:00",
+      "showId": null,
+      "status": "available"
+    },
+    {
+      "slot": 10,
+      "time": "10:00",
+      "showId": null,
+      "status": "available"
+    },
+    {
+      "slot": 11,
+      "time": "11:00",
+      "showId": null,
+      "status": "available"
+    },
+    {
+      "slot": 12,
+      "time": "12:00",
+      "showId": null,
+      "status": "available",
+      "duration": 986
+    },
+    {
+      "slot": 13,
+      "time": "13:00",
+      "showId": null,
+      "status": "available",
+      "duration": 0
+    },
+    {
+      "slot": 14,
+      "time": "14:00",
+      "showId": "show_1753150327283",
+      "status": "scheduled",
+      "title": "Frigid",
+      "dj": "resident@cap.com"
+    },
+    {
+      "slot": 15,
+      "time": "15:00",
+      "showId": null,
+      "status": "available"
+    },
+    {
+      "slot": 16,
+      "time": "16:00",
+      "showId": null,
+      "status": "available"
+    },
+    {
+      "slot": 17,
+      "time": "17:00",
+      "showId": null,
+      "status": "available"
+    },
+    {
+      "slot": 18,
+      "time": "18:00",
+      "showId": "show_1753204395920",
+      "status": "scheduled",
+      "title": "test2",
+      "dj": "deer@deer.com"
+    },
+    {
+      "slot": 19,
+      "time": "19:00",
+      "showId": null,
+      "status": "available"
+    },
+    {
+      "slot": 20,
+      "time": "20:00",
+      "showId": null,
+      "status": "available"
+    },
+    {
+      "slot": 21,
+      "time": "21:00",
+      "showId": null,
+      "status": "available"
+    },
+    {
+      "slot": 22,
+      "time": "22:00",
+      "showId": null,
+      "status": "available"
+    },
+    {
+      "slot": 23,
+      "time": "23:00",
+      "showId": null,
+      "status": "available",
+      "duration": 0
+    }
+  ]
+}
